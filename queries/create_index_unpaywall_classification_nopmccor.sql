@@ -1,1 +1,0 @@
-CREATE INDEX idx_unpaywall_classification_nopmccor ON userdb_frasernm.dbo.unpaywall_classification_nopmccor(doi)

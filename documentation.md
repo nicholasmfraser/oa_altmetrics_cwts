@@ -41,3 +41,57 @@ read_csv("data/wos_items_year.csv") %>%
 ```
 
 ![](documentation_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+## OA Classification
+
+OA classification was conducted using data from Unpaywall. Unpaywall
+data (from the April 2019 data dump) has been parsed into a relational
+(SQL) database at CWTS.
+
+The following tables were used:
+
+  - unpaywall\_2019apr\_json.dbo.pub (article details)
+  - unpaywall\_2019apr\_json.dbo.pub\_oa\_location (article oa location
+    details)
+
+OA classification was initially conducted following the workflow
+detailed in Figure 1 from [Robinson-Garcia et
+al. (2019)](https://arxiv.org/abs/1906.03840):
+
+![robinson\_garcia\_unpaywall\_classification](figures/robinson_garcia_unpaywall_classification.PNG)
+
+This classification diverges from the OA classification scheme [used by
+Unpaywall
+directly](https://support.unpaywall.org/support/solutions/articles/44001777288-what-do-the-types-of-oa-status-green-gold-hybrid-and-bronze-mean-)
+in two ways:
+
+  - Green OA is a non-exclusive category, meaning that it can overlap
+    with other journal-based OA categories. E.g. a paper can be
+    published in a Gold OA journal, and hosted on a Green OA repository,
+    and would thus be labelled both ‘Gold’ and ‘Green’.
+  - Articles hosted on PubMed Central (PMC) are, however, not classified
+    as Green OA *if* they are available through another OA outlet. As
+    authors do not submit manuscripts to PMC directly, it is not a
+    ‘self-archiving’ repository in the ‘traditional’ sense, and
+    coincides largely with Gold OA journals (e.g. all articles in PLOS
+    journals are also available in PMC).
+
+Some implications of these two points are considered below.
+
+### PMC
+
+To test the influence of the inclusion/exclusion of articles contained
+in PMC on Green OA rates, two classification procedures were conducted:
+one including all PMC articles in Green OA
+([create\_table\_unpaywall\_classification\_nopmccor.sql](queries/create_table_unpaywall_classification_nopmccor.sql)),
+and one excluding PMC articles from Green OA when they match with an
+alternative kind of OA
+([create\_table\_unpaywall\_classification\_pmccor.sql](queries/create_table_unpaywall_classification_pmccor.sql)).
+
+### Green OA
+
+## Altmetrics
+
+### Platforms
+
+### Indicators
