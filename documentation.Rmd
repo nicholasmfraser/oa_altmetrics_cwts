@@ -7,6 +7,36 @@ output: github_document
 ```{r echo = F, include = F}
 # Load necessary libraries
 library(tidyverse)
+
+# Set chart themes
+theme_set(theme_minimal() +
+          theme(text = element_text(size=12),
+                axis.text.x = element_text(angle=45, hjust=1),
+                axis.title.x = element_text(margin = margin(t = 15, unit = "pt")),
+                axis.title.y = element_text(margin = margin(r = 15, unit = "pt")),
+                plot.title = element_text(margin = margin(t = 5, b = 15, unit = "pt"),
+                                          hjust = 0.5)))
+
+# Color palette
+# From https://www.materialui.co/colors
+palette <- c(
+  `closed`      = "#9E9E9E",
+  `open`        = "#00BCD4",
+  `gold`        = "#FDD835",
+  `hybrid`      = "#FB8C00",
+  `bronze`      = "#BF360C",
+  `green`       = "#4CAF50",
+  `light green` = "#A5D6A7",
+  `dark green`  = "#2E7D32")
+
+palette_color <- function(color) {
+  cols <- c(color)
+  if (is.null(cols)) {
+    return(NA)
+  } else {
+    return(unname(palette[color]))
+  }
+}
 ```
 
 # Open Access and Altmetrics
@@ -28,19 +58,17 @@ Articles were limited to those published in publication years 2012-2018, article
 A table containing relevant items was extracted with the SQL query
 [create_table_wos_items.sql](queries/create_table_wos_items.sql).
 
-##### Distribution of WOS items by year
-
-```{r message = F}
+```{r echo = F, message = F}
 
 read_csv("data/wos_items_year.csv") %>%
   ggplot() +
   geom_bar(aes(x = year, y = n_items), stat = "identity") +
-  theme_minimal() +
   labs(x = "", 
-       y = "Published articles") +
+       y = "Articles",
+       "title" = "Distribution of WOS articles per year") +
   scale_x_continuous(breaks = 2012:2018) +
-  scale_y_continuous(labels = scales::comma)
-  
+  scale_y_continuous(labels = scales::comma) 
+
 ```
 
 ## OA Classification
@@ -67,12 +95,128 @@ Some implications of these two points are considered below.
 
 To test the influence of the inclusion/exclusion of articles contained in PMC on Green OA rates, two classification procedures were conducted: one including all PMC articles in Green OA ([create_table_unpaywall_classification_nopmccor.sql](queries/create_table_unpaywall_classification_nopmccor.sql)), and one excluding PMC articles from Green OA when they match with an alternative kind of OA ([create_table_unpaywall_classification_pmccor.sql](queries/create_table_unpaywall_classification_pmccor.sql)).
 
+The number of articles classified as Green OA are compared depending on whether PMC is included or excluded as a source of Green OA (note: this has no effect on other OA classification types):
 
+```{r echo = F, message = F}
 
+read_csv("data/unpaywall_classification_pmc_comparison.csv",
+         col_types = "nln") %>%
+  mutate(pmc_corrected = factor(pmc_corrected,
+                                levels = c(T, F))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = green, group = pmc_corrected, fill = pmc_corrected), 
+           stat = "identity", position = "dodge") +
+  labs(x = "", 
+       y = "Green OA articles",
+       title = "Green OA articles with and without PMC",
+       fill = "Excludes PMC") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("dark green"),
+                               palette_color("light green")))
+```
+
+PMC clearly contributes a large proportion of Green OA from 2010 to 2017. In 2018 and 2019, no PMC articles are found to contribute to Green OA  - notably, no articles are found for these year in the Unpaywall data where the evidence is described as "oa repository (via pmcid lookup)". However, when checking the same articles from 2018 and 2019 directly via the Unpaywall API, PMC *is* included as an evidence source. A possibility is that Unpaywall only crawl PMC sporadically (as articles in Gold OA journals, such as PLOS ONE, are deposited immediately to PMC), or that a technical issue occurred.
+
+The overlap of PMC with other journal-based OA types (gold, bronze, hybrid) was also assessed:
+
+```{r echo = F, message = F}
+
+read_csv("data/unpaywall_classification_pmc_overlap.csv") %>%
+  pivot_longer(closed:bronze) %>%
+  # there is no overlap between closed and PMC
+  filter(name != "closed") %>%
+  mutate(type = factor(name,
+                       levels = c("gold", "hybrid", "bronze"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = type),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Overlap of articles in PMC with other OA types",
+       fill = "OA Type") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze")))
+
+```
+
+PMC appears to overlap most strongly (and overlap has grown most rapidly) with Gold OA, but also a non-negligible amount with Hybrid and Bronze OA.
+
+##### Should we exclude PMC from our analysis?
+
+From these results there seems no 'a priori' reason to completely exclude PMC. Even though authors do not deposit work to PMC, it remains an open repository and discovery tool and may thus have an influence on article impact. An alternative may eventually be to create a separate category for PMC articles. For the following documentation, PMC articles are included and labelled as Green OA.
 
 ### Green OA
 
+Following the classification procedure of Robinson-Garcia et al. (2019), Green OA is treated as a non-exclusive category, i.e. an article is labelled as Green if it is available via a repository, regardless of its availability status at the journal page. However, some questions remain about this approach in the context of understanding OA impact - for example, will authors really use (and be more likely to cite/mention) an article if it is an OA repository, when it is also available directly (and likely more easily) on a journal page? The impact dynamics are therefore likely different for Green OA, depending on the availability of the corresponding journal article.
 
+To understand this better, the share of Green OA that is open (i.e. the sum of Gold, Green and Bronze OA) and closed at the journal page is shown:
+
+```{r echo = F, message = F}
+# Compare 
+read_csv("data/unpaywall_classification_green_types.csv") %>%
+  pivot_longer(all_green:only_green) %>%
+  filter(name %in% c("journal_oa_green", "only_green")) %>%
+  mutate(name = factor(name,
+                       levels = c("only_green",
+                                  "journal_oa_green"),
+                       labels = c("Closed at journal page",
+                                  "Open at journal page"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name), 
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Green OA by journal article availability",
+       fill = "Article availability") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("light green"),
+                               palette_color("dark green")))
+```
+
+Interestingly, Green OA growth is driven more strongly by articles which are also available at the corresponding journal page. The decrease in OA coverage after 2018 is in part due to the issues with PMC coverage documented above, and also likely due to journal embargo periods. A more fine-grained analysis shows the share of Green OA in each journal type:
+
+```{r echo = F, message = F}
+
+read_csv("data/unpaywall_classification_green_types.csv") %>%
+  pivot_longer(all_green:only_green) %>%
+  filter(name %in% c("gold_green", "hybrid_green", "bronze_green", "only_green")) %>%
+  mutate(name = factor(name,
+                       levels = c("gold_green",
+                                  "hybrid_green",
+                                  "bronze_green",
+                                  "only_green"),
+                       labels = c("Gold",
+                                  "Hybrid",
+                                  "Bronze",
+                                  "Closed"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "",
+       fill = "OA Type") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("closed")))
+
+```
+
+The results show that in general, the contribution of Gold and Hybrid articles to Green OA shares has grown strongly between 2010 and 2017. Interestingly, the contribution of Bronze OA articles over this time period remains relatively static, and even falls marginally from 2014 onwards. 
+
+##### Should Green OA articles be labelled at a more granular level?
+
+...to discuss...
+
+### Open Access shares
 
 ## Altmetrics
 
