@@ -53,8 +53,8 @@ read_csv("data/wos_items_year.csv") %>%
 
 ISO Alpha-2 country codes of **first** authors were extracted for the
 set of articles defined above
-([query](queries/create_table_wos_first_authors.sql)), combining the
-following tables:
+([query](queries/create_table_wos_first_author_countries.sql)),
+combining the following tables:
 
   - userdb\_frasernm.dbo.wos\_items (as defined above)
   - wosaddr1913.dbo.pub\_author\_affiliation
@@ -155,7 +155,7 @@ Counts were initially extracted for the following altmetric indicators:
 Where no altmetric information was found for an article, counts were
 registered as zero.
 
-##### Overall coverage of WOS articles by different altmetric indicators per year ([query](queries/calc_altmetric_coverage_year.sql))
+##### Overall coverage of WOS articles by different altmetric indicators per year ([query](queries/calc_altmetrics_coverage_year.sql))
 
 ``` r
 read_csv("data/altmetrics_coverage_year.csv") %>%
@@ -167,7 +167,7 @@ read_csv("data/altmetrics_coverage_year.csv") %>%
                        labels = c("Blogs", "Facebook", "News", "Policies",
                                   "Twitter", "Wikipedia"))) %>%
   ggplot() +
-  geom_bar(aes(x = year, y = value, fill = name), stat = "identity") +
+  geom_bar(aes(x = year, y = value), stat = "identity") +
   facet_wrap(. ~ name) +
   labs(x = "", 
        y = "Coverage") +
@@ -178,13 +178,14 @@ read_csv("data/altmetrics_coverage_year.csv") %>%
 
 ![](documentation_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
-The best coverage is clearly observed in Twitter, followed by Facebook,
-then news and blogs, Wikipedia and policies. Different temporal trends
-are observed for each indicator, e.g. Twitter coverage increases greatly
-between 2012 and 2016, which may reflect rapid user growth on the
-platform itself. Conversely, policy citations decrease over time, likely
-because policy citations take longer to accrue (\~years) than mentions
-on social media (\~days to weeks).
+The highest coverage is observed in Twitter, followed by Facebook, then
+news and blogs, Wikipedia and policies. Different temporal trends are
+observed for each indicator, e.g. Twitter coverage increases between
+2012 and 2016, which may reflect rapid user growth on the platform
+itself. Conversely, policy citations decrease over time, likely because
+policy citations take longer to accrue (\~years) than mentions on social
+media (\~days to weeks) (see [Fang and
+Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
 
 ## OA Classification
 
@@ -236,9 +237,23 @@ and one excluding PMC articles from Green OA when they match with an
 alternative kind of OA
 ([create\_table\_unpaywall\_classification\_pmccor.sql](queries/create_table_unpaywall_classification_pmccor.sql)).
 
-The number of articles classified as Green OA are compared depending on
-whether PMC is included or excluded as a source of Green OA (note: this
-has no effect on other OA classification types):
+##### Green OA articles in Unpaywall including and excluding PMC ([query](queries/calc_unpaywall_classification_pmc_comparison.sql))
+
+``` r
+read_csv("data/unpaywall_classification_pmc_comparison.csv",
+         col_types = "nln") %>%
+  mutate(pmc_corrected = factor(pmc_corrected,
+                                levels = c(T, F))) %>%
+  ggplot(aes(x = year, y = green, fill = pmc_corrected)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "", 
+       y = "Green OA articles",
+       fill = "Excludes PMC") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("dark green"),
+                               palette_color("light green")))
+```
 
 ![](documentation_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
@@ -250,64 +265,91 @@ However, when checking the same articles from 2018 and 2019 directly via
 the Unpaywall API, PMC *is* included as an evidence source. A
 possibility is that Unpaywall only crawl PMC sporadically (as articles
 in Gold OA journals, such as PLOS ONE, are deposited immediately to
-PMC), or that a technical issue occurred.
+PMC), or that a technical issue occurred \[**to do:** investigate this
+issue further. Contact Unpaywall?\]
 
-The overlap of PMC with other journal-based OA types (gold, bronze,
-hybrid) was also assessed:
+##### Overlap of articles in PMC with journal-based OA types ([query](queries/calc_unpaywall_classification_pmc_overlap.sql))
+
+``` r
+read_csv("data/unpaywall_classification_pmc_overlap.csv") %>%
+  pivot_longer(closed:bronze) %>%
+  # there is no overlap between closed and PMC
+  filter(name != "closed") %>%
+  mutate(type = factor(name,
+                       levels = c("gold", "hybrid", "bronze"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = type),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       fill = "OA Type") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze")))
+```
 
 ![](documentation_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 PMC appears to overlap most strongly (and overlap has grown most
 rapidly) with Gold OA, but also a non-negligible amount with Hybrid and
-Bronze OA.
+Bronze OA. Note, as previously, PMC articles are missing from 2018 and
+2019.
 
-#### Should we exclude PMC from our analysis?
-
-From these results there seems no ‘a priori’ reason to completely
-exclude PMC. Even though authors do not deposit work to PMC, it remains
-an open repository and discovery tool and may thus have an influence on
-article impact. An alternative may eventually be to create a separate
-category for PMC articles. For the following documentation, PMC articles
-are included and labelled as Green OA.
-
-### Green OA
+### Exclusivity of Green OA
 
 Following the classification procedure of Robinson-Garcia et al. (2019),
 Green OA is treated as a non-exclusive category, i.e. an article is
 labelled as Green if it is available via a repository, regardless of its
 availability status at the journal page. However, some questions remain
 about this approach in the context of understanding OA impact - for
-example, will authors really use (and be more likely to cite/mention) an
-article if it is an OA repository, when it is also available directly
-(and likely more easily) on a journal page? The impact dynamics are
+example, from the readership perspective, will readers really use (and
+be more likely to cite/mention) an article if it is an OA repository,
+when it is also available directly on a journal page? And from the
+authors perspective - do the authors who publish in OA journals **and**
+self-archive their papers represent a different demographic/category of
+authors, than those who **only** self-archive? The impact dynamics are
 therefore likely different for Green OA, depending on the availability
 of the corresponding journal article.
 
-To understand this better, the share of Green OA that is open (i.e. the
-sum of Gold, Green and Bronze OA) and closed at the journal page is
-shown:
+##### Number of Green OA articles that are open and closed at the corresponding journal page ([query](queries/calc_unpaywall_classification_green_types.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-Interestingly, Green OA growth is driven more strongly by articles which
-are also available at the corresponding journal page. The decrease in
-Green OA coverage after 2018 is in part due to the issues with PMC
-coverage documented above, and also likely due to journal embargo
-periods. A more fine-grained analysis shows, for the articles available
-at the journal page, the number of articles contributing to Green OA for
-each journal type:
+It appears that Green OA growth is more strongly represented by articles
+which are also available at the corresponding journal page, than closed
+articles. Note, however, that the above figures includes PMC articles -
+as shown in the previous section, there is also a large overlap of PMC
+with Gold OA, and to a lesser extent with Hybrid and Bronze OA.
+
+##### Number of Green OA articles published in different types of OA journals ([query](queries/calc_unpaywall_classification_green_types.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
-The results show that in general, the contribution of Gold and Hybrid
-articles to Green OA shares has grown strongly between 2010 and 2017.
-Interestingly, the contribution of Bronze OA articles over this time
-period remains relatively static, and even falls marginally from 2014
-onwards.
+The results show that the contribution of Gold articles to Green OA
+shares has grown most strongly between 2010 and 2017. However,
+approximately 75% of the growth can be attributed to growth in deposits
+to PMC. Interestingly, whilst the contribution of Hybrid OA has grown
+over this time period, the contribution of Bronze OA remains relatively
+static, and even falls marginally from 2014 onwards.
 
-#### Should Green OA articles be labelled at a more granular level?
+### Recommendations for classifying Green OA
 
-…to discuss…
+From the above results, a general recommendation is that Green OA cannot
+be considered a ‘black box’ in the context of understanding impact
+metrics, as it includes multiple archiving routes, and interacts
+strongly with other forms of OA.
+
+Even though authors do not deposit work to PMC, it remains an open
+repository and discovery tool and thus from the reader perspective may
+have an influence on impact. However, the strong overlap between PMC and
+Gold OA means that including PMC articles within Green OA will lead to a
+bias towards Gold OA. From the author perspective, PMC also represents a
+different demographic/category of authors, than authors who actively
+self-archive their work. An alternative may therefore be to create
+separate categories for Green OA including and excluding PMC articles,
+or for Green OA including and excluding journal-based OA.
 
 ### Open Access shares
 
