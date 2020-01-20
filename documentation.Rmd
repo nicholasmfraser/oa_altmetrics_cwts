@@ -67,16 +67,15 @@ Extracted fields included:
 
 DOIs were converted to lowercase for matching with other datasets (e.g. Unpaywall, Altmetric.com). A small number of DOIs (N ~ 250) were found to include a comma in the DOI string (causing issues with .csv export) and were thus removed.
 
-##### Distribution of WOS articles per year ([query](queries/cal_wos_items_year.sql))
+##### Distribution of WOS articles per year ([query](queries/calc_wos_items_year.sql))
 
-```{r echo = F, message = F}
+```{r message = F}
 
 read_csv("data/wos_items_year.csv") %>%
   ggplot() +
   geom_bar(aes(x = year, y = n_items), stat = "identity") +
   labs(x = "", 
-       y = "Articles",
-       "title" = "Distribution of WOS articles per year") +
+       y = "Articles") +
   scale_x_continuous(breaks = 2012:2018) +
   scale_y_continuous(labels = scales::comma)
 
@@ -93,12 +92,65 @@ ISO Alpha-2 country codes of **first** authors were extracted for the set of art
 
 Where authors were affiliated with more than one country, country affiliations were weighted accordingly (e.g. an author belonging to the UK and US would count as 0.5 towards the UK, and 0.5 towards the US).
 
+##### Top 30 countries included in WOS article corpus ([query](queries/calc_wos_items_country.sql))
+
+```{r message = F, warning = F}
+
+read_csv("data/wos_items_country.csv") %>%
+  mutate(country = countrycode::countrycode(country, "iso2c", "country.name"),
+         proportion = n_items / sum(n_items)) %>%
+  arrange(proportion) %>%
+  top_n(30) %>%
+  ggplot(aes(x = reorder(country, proportion), y = proportion)) +
+  geom_bar(stat = "identity") + 
+  labs(x = "",
+       y= "Articles") +
+  scale_y_continuous(labels = scales::percent) +
+  coord_flip() +
+  theme(text = element_text(size = 10))
+
+```
+
 ### Subject Classifications
 
+Subject classifications are assigned to 5 major subject areas, which conform to the subject classifications used in the [Leiden Ranking](https://leidenranking.com). The fields are defined algorithmically (as outlined [here](https://leidenranking.com/information/fields)), based on the publication-level classification system detailed in [Waltman and van Eck (2012)](https://onlinelibrary.wiley.com/doi/full/10.1002/asi.22748). In brief terms, publications are initially clustered into research areas at 3 levels of granularity, based on citation relations. The classification system here uses the level of highest granularity, where publications are clustered into 4535 micro-level fields of science. For each micro-level field, the overlap with each of the 252 WOS subject areas (excluding Multidisciplinary Sciences) is determined. Each of these 252 subject categories is then assigned to the 5 main fields of the Leiden Ranking.
+
+For this study, classification was conducted using the following tables ([query](queries/create_table_wos_classification.sql)):
+
+- userdb_frasernm.dbo.wos_items (as defined above)
+- wosclassification1913.dbo.clustering
+- wosclassification1913.dbo.cluster_LR_main_field3
+- wosclassification1913.dbo.LR_main_field
+
+Note that publications can belong to more than one field, which are then weighted accordingly (i.e. a publication belonging to both "Biomedical and Health Sciences" and "Life and Earth Sciences" would be assigned a weight of 0.5 for both fields).
+
+##### Proportion of WOS articles contained in each subject classification ([query](queries/calc_wos_items_classification.sql))
+
+```{r message = F, warning = F}
+
+read_csv("data/wos_items_classification.csv") %>%
+  mutate(proportion = n_items / sum(n_items)) %>%
+  arrange(proportion) %>%
+  ggplot(aes(x = reorder(LR_main_field, proportion), y = proportion)) +
+  geom_bar(stat = "identity") + 
+  labs(x = "",
+       y= "Articles") +
+  scale_y_continuous(labels = scales::percent) +
+  coord_flip() +
+  theme(text = element_text(size = 10))
+
+
+```
 
 ## Altmetrics Data
 
-Altmetrics count data were derived from the CWTS in-house database of Altmetric.com data (version October 2019)([query](queries/create_table_altmetric_counts.sql)). Counts were extracted for the following altmetric indicators:
+Altmetrics data were derived from the CWTS in-house database of Altmetric.com (version October 2019) ([query](queries/create_table_altmetric_counts.sql)), using the following tables:
+
+- userdb_frasernm.dbo.wos_items (as defined above)
+- altmetric_2019oct.dbo.pub_citation
+- altmetric_2019oct.dbo.pub_counts
+
+Counts were initially extracted for the following altmetric indicators:
 
 - Blogs
 - Facebook
@@ -109,29 +161,32 @@ Altmetrics count data were derived from the CWTS in-house database of Altmetric.
 
 Where no altmetric information was found for an article, counts were registered as zero.
 
-## Altmetrics coverage
+##### Overall coverage of WOS articles by different altmetric indicators per year ([query](queries/calc_altmetric_coverage_year.sql))
 
-```{r}
 
-read_csv("data/altmetrics_coverage_all_years.csv") %>%
+```{r message = F, warning = F}
+
+read_csv("data/altmetrics_coverage_year.csv") %>%
   pivot_longer(coverage_blog:coverage_wikipedia) %>%
+  mutate(name = factor(name,
+                       levels = c("coverage_blog", "coverage_facebook",
+                                  "coverage_news", "coverage_policy",
+                                  "coverage_twitter", "coverage_wikipedia"),
+                       labels = c("Blogs", "Facebook", "News", "Policies",
+                                  "Twitter", "Wikipedia"))) %>%
   ggplot() +
-  geom_bar(aes(x = year, y = value)) +
-  facet_wrap(.~year)
+  geom_bar(aes(x = year, y = value, fill = name), stat = "identity") +
+  facet_wrap(. ~ name) +
+  labs(x = "", 
+       y = "Coverage") +
+  scale_x_continuous(breaks = 2012:2018) +
+  scale_y_continuous(labels = scales::percent) +
+  theme(legend.position = "none")
 
 
 ```
 
-
-
-### Altmetrics counts
-
-```{r}
-
-```
-
-
-
+The best coverage is clearly observed in Twitter, followed by Facebook, then news and blogs, Wikipedia and policies. Different temporal trends are observed for each indicator, e.g. Twitter coverage increases greatly between 2012 and 2016, which may reflect rapid user growth on the platform itself. Conversely, policy citations decrease over time, likely because policy citations take longer to accrue (~years) than mentions on social media (~days to weeks). 
 
 ## OA Classification
 
