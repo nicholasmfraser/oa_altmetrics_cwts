@@ -67,7 +67,7 @@ Extracted fields included:
 
 DOIs were converted to lowercase for matching with other datasets (e.g. Unpaywall, Altmetric.com). A small number of DOIs (N ~ 250) were found to include a comma in the DOI string (causing issues with .csv export) and were thus removed.
 
-##### Distribution of WOS articles per year ([query](#))
+##### Distribution of WOS articles per year ([query](queries/cal_wos_items_year.sql))
 
 ```{r echo = F, message = F}
 
@@ -78,13 +78,13 @@ read_csv("data/wos_items_year.csv") %>%
        y = "Articles",
        "title" = "Distribution of WOS articles per year") +
   scale_x_continuous(breaks = 2012:2018) +
-  scale_y_continuous(labels = scales::comma) 
+  scale_y_continuous(labels = scales::comma)
 
 ```
 
 ### Author Countries
 
-ISO Alpha-2 country codes of **first** authors were extracted for the set of articles defined above ([query](create_table_wos_first_authors.sql)), combining the following tables:
+ISO Alpha-2 country codes of **first** authors were extracted for the set of articles defined above ([query](queries/create_table_wos_first_authors.sql)), combining the following tables:
 
 - userdb_frasernm.dbo.wos_items (as defined above)
 - wosaddr1913.dbo.pub_author_affiliation
@@ -110,6 +110,18 @@ Altmetrics count data were derived from the CWTS in-house database of Altmetric.
 Where no altmetric information was found for an article, counts were registered as zero.
 
 ## Altmetrics coverage
+
+```{r}
+
+read_csv("data/altmetrics_coverage_all_years.csv") %>%
+  pivot_longer(coverage_blog:coverage_wikipedia) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value)) +
+  facet_wrap(.~year)
+
+
+```
+
 
 
 ### Altmetrics counts
