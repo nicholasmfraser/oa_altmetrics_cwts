@@ -1,4 +1,4 @@
-/* Drop table if it alreadz exists */
+/* Drop table if it already exists */
 DROP TABLE userdb_frasernm.dbo.unpaywall_classification_pmccor;
 
 /* Create new table */
