@@ -43,20 +43,31 @@ palette_color <- function(color) {
 
 This notebook contains documentation for the study on the relationship between Open Access (OA) and altmetrics.
 
-## Article Corpus
+## Web of Science
 
-Articles were derived from the in-house Web of Science (WOS) database maintained by CWTS.
+### Article Corpus
 
-The following tables were used:
+Articles were derived from the in-house Web of Science (WOS) database maintained by CWTS ([query](queries/create_table_wos_items.sql)).
 
-- wosdb.dbo.UT (source item)
-- wosdb.dbo.UI (source issue)
-- wosdb.dbo.AR (additional item identifier)
+The following tables were used to build the article corpus:
 
-Articles were limited to those published in publication years 2012-2018, articles published in journals, 'Article' and 'Review' document types, and articles with valid (non-null) DOIs. DOIs were converted to lowercase for matching with other datasets (e.g. Unpaywall, Altmetric.com).
+- woskb.dbo.cwts_ut
+- woskb.dbo.cwts_pub_details
 
-A table containing relevant items was extracted with the SQL query
-[create_table_wos_items.sql](queries/create_table_wos_items.sql).
+Extracted fields included:
+
+- ut
+- doi (limited to non-null values)
+- year (limited to 2012:2018)
+- n_authors
+- n_institutes
+- n_countries
+- source (journal name)
+- doc type (limited to 'Article' and 'Review')
+
+DOIs were converted to lowercase for matching with other datasets (e.g. Unpaywall, Altmetric.com). A small number of DOIs (N ~ 250) were found to include a comma in the DOI string (causing issues with .csv export) and were thus removed.
+
+##### Distribution of WOS articles per year ([query](#))
 
 ```{r echo = F, message = F}
 
@@ -71,6 +82,45 @@ read_csv("data/wos_items_year.csv") %>%
 
 ```
 
+### Author Countries
+
+ISO Alpha-2 country codes of **first** authors were extracted for the set of articles defined above ([query](create_table_wos_first_authors.sql)), combining the following tables:
+
+- userdb_frasernm.dbo.wos_items (as defined above)
+- wosaddr1913.dbo.pub_author_affiliation
+- wosaddr1913.dbo.pub_affiliation
+- wosaddr1913.dbo.country
+
+Where authors were affiliated with more than one country, country affiliations were weighted accordingly (e.g. an author belonging to the UK and US would count as 0.5 towards the UK, and 0.5 towards the US).
+
+### Subject Classifications
+
+
+## Altmetrics Data
+
+Altmetrics count data were derived from the CWTS in-house database of Altmetric.com data (version October 2019)([query](queries/create_table_altmetric_counts.sql)). Counts were extracted for the following altmetric indicators:
+
+- Blogs
+- Facebook
+- News
+- Policy
+- Twitter
+- Wikipedia
+
+Where no altmetric information was found for an article, counts were registered as zero.
+
+## Altmetrics coverage
+
+
+### Altmetrics counts
+
+```{r}
+
+```
+
+
+
+
 ## OA Classification
 
 OA classification was conducted using data from Unpaywall. Unpaywall data (from the April 2019 data dump) has been parsed into a relational (SQL) database at CWTS. 
@@ -80,14 +130,16 @@ The following tables were used:
 - unpaywall_2019apr_json.dbo.pub (article details)
 - unpaywall_2019apr_json.dbo.pub_oa_location (article oa location details)
 
-OA classification was initially conducted following the workflow detailed in Figure 1 from [Robinson-Garcia et al. (2019)](https://arxiv.org/abs/1906.03840):
+Articles were limited to those with a publication date between 2010 and 2019. This is slightly more inclusive than the WOS articles (2012-2019), to account for potential differences in recorded publication years between the two datasets (and thus ensures maximum coverage of WoS articles in the Unpaywall dataset).
+
+OA classification was first conducted following the workflow detailed in Figure 1 from [Robinson-Garcia et al. (2019)](https://arxiv.org/abs/1906.03840):
 
 ![robinson_garcia_unpaywall_classification](figures/external/robinson_garcia_unpaywall_classification.PNG)
 
 This classification diverges from the OA classification scheme [used by Unpaywall directly](https://support.unpaywall.org/support/solutions/articles/44001777288-what-do-the-types-of-oa-status-green-gold-hybrid-and-bronze-mean-) in two ways:
 
 * Green OA is a non-exclusive category, meaning that it can overlap with other journal-based OA categories. E.g. a paper can be published in a Gold OA journal, and hosted on a Green OA repository, and would thus be labelled both 'Gold' and 'Green'.
-* Articles hosted on PubMed Central (PMC) are, however, not classified as Green OA *if* they are available through another OA outlet. As authors do not submit manuscripts to PMC directly, it is not a 'self-archiving' repository in the 'traditional' sense, and may coincide largely with Gold OA journals (e.g. all articles in PLOS journals are also available in PMC).
+* Articles hosted on PubMed Central (PMC) are, however, not classified as Green OA *if* they are available through another OA outlet. As authors do not submit manuscripts to PMC directly, it is not a 'self-archiving' repository in the 'traditional' sense.
 
 Some implications of these two points are considered below.
 
@@ -145,7 +197,7 @@ read_csv("data/unpaywall_classification_pmc_overlap.csv") %>%
 
 PMC appears to overlap most strongly (and overlap has grown most rapidly) with Gold OA, but also a non-negligible amount with Hybrid and Bronze OA.
 
-##### Should we exclude PMC from our analysis?
+#### Should we exclude PMC from our analysis?
 
 From these results there seems no 'a priori' reason to completely exclude PMC. Even though authors do not deposit work to PMC, it remains an open repository and discovery tool and may thus have an influence on article impact. An alternative may eventually be to create a separate category for PMC articles. For the following documentation, PMC articles are included and labelled as Green OA.
 
@@ -178,51 +230,174 @@ read_csv("data/unpaywall_classification_green_types.csv") %>%
                                palette_color("dark green")))
 ```
 
-Interestingly, Green OA growth is driven more strongly by articles which are also available at the corresponding journal page. The decrease in OA coverage after 2018 is in part due to the issues with PMC coverage documented above, and also likely due to journal embargo periods. A more fine-grained analysis shows the share of Green OA in each journal type:
+Interestingly, Green OA growth is driven more strongly by articles which are also available at the corresponding journal page. The decrease in Green OA coverage after 2018 is in part due to the issues with PMC coverage documented above, and also likely due to journal embargo periods. A more fine-grained analysis shows, for the articles available at the journal page, the number of articles contributing to Green OA for each journal type:
 
 ```{r echo = F, message = F}
 
 read_csv("data/unpaywall_classification_green_types.csv") %>%
   pivot_longer(all_green:only_green) %>%
-  filter(name %in% c("gold_green", "hybrid_green", "bronze_green", "only_green")) %>%
+  filter(name %in% c("gold_green", "hybrid_green", "bronze_green")) %>%
   mutate(name = factor(name,
                        levels = c("gold_green",
                                   "hybrid_green",
-                                  "bronze_green",
-                                  "only_green"),
+                                  "bronze_green"),
                        labels = c("Gold",
                                   "Hybrid",
-                                  "Bronze",
-                                  "Closed"))) %>%
+                                  "Bronze"))) %>%
   ggplot() +
   geom_bar(aes(x = year, y = value, fill = name),
            stat = "identity", position = "dodge", width = 0.75) +
   labs(x = "", 
        y = "Articles",
-       title = "",
+       title = "Green OA by journal type",
        fill = "OA Type") +
   scale_x_continuous(breaks = 2010:2019) +
   scale_y_continuous(labels = scales::comma) +
   scale_fill_manual(values = c(palette_color("gold"),
                                palette_color("hybrid"),
-                               palette_color("bronze"),
-                               palette_color("closed")))
+                               palette_color("bronze")))
 
 ```
 
 The results show that in general, the contribution of Gold and Hybrid articles to Green OA shares has grown strongly between 2010 and 2017. Interestingly, the contribution of Bronze OA articles over this time period remains relatively static, and even falls marginally from 2014 onwards. 
 
-##### Should Green OA articles be labelled at a more granular level?
+#### Should Green OA articles be labelled at a more granular level?
 
 ...to discuss...
 
 ### Open Access shares
 
-## Altmetrics
+Including all data from Unpaywall:
 
-### Platforms
+```{r echo = F, message = F}
 
-### Indicators
+# Closed versus Open
+read_csv("data/unpaywall_classification.csv") %>%
+  pivot_longer(closed:only_green) %>%
+  filter(name %in% c("closed", "oa")) %>%
+  mutate(name = factor(name,
+                       levels = c("closed",
+                                  "oa"),
+                       labels = c("Closed",
+                                  "All OA"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Title here",
+       fill = "Access Type") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"),
+                               palette_color("open")))
+
+read_csv("data/wos_unpaywall_classification.csv") %>%
+  pivot_longer(closed:only_green) %>%
+  filter(name %in% c("closed", "oa")) %>%
+  mutate(name = factor(name,
+                       levels = c("closed",
+                                  "oa"),
+                       labels = c("Closed",
+                                  "All OA"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Title here",
+       fill = "Access Type") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"),
+                               palette_color("open")))
+  
+
+# By OA Journal Type
+read_csv("data/unpaywall_classification.csv") %>%
+  pivot_longer(closed:only_green) %>%
+  filter(name %in% c("closed", "gold", "hybrid", "bronze", "green")) %>%
+  mutate(name = factor(name,
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"),
+                       labels = c("Closed", "Gold", "Hybrid", "Bronze", "Green"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Title here",
+       fill = "Access Type") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"),
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green")))
+
+read_csv("data/wos_unpaywall_classification.csv") %>%
+  pivot_longer(closed:only_green) %>%
+  filter(name %in% c("closed", "gold", "hybrid", "bronze", "green")) %>%
+  mutate(name = factor(name,
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"),
+                       labels = c("Closed", "Gold", "Hybrid", "Bronze", "Green"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Title here",
+       fill = "Access Type") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"),
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green")))
+
+# Splitting Green OA types
+read_csv("data/unpaywall_classification.csv") %>%
+  pivot_longer(closed:only_green) %>%
+  filter(name %in% c("journal_green", "only_green")) %>%
+  mutate(name = factor(name,
+                       levels = c("only_green", "journal_green"),
+                       labels = c("Closed at journal page",
+                                  "Open at journal page"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Green OA by journal article availability",
+       fill = "Article availability") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("light green"),
+                               palette_color("dark green")))
+
+read_csv("data/wos_unpaywall_classification.csv") %>%
+  pivot_longer(closed:only_green) %>%
+  filter(name %in% c("journal_green", "only_green")) %>%
+  mutate(name = factor(name,
+                       levels = c("only_green", "journal_green"),
+                       labels = c("Closed at journal page",
+                                  "Open at journal page"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = value, fill = name),
+           stat = "identity", position = "dodge", width = 0.75) +
+  labs(x = "", 
+       y = "Articles",
+       title = "Green OA by journal article availability",
+       fill = "Article availability") +
+  scale_x_continuous(breaks = 2010:2019) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("light green"),
+                               palette_color("dark green")))
+
+```
+
+
 
 
 

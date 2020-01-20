@@ -7,27 +7,55 @@ Nicholas Fraser
 This notebook contains documentation for the study on the relationship
 between Open Access (OA) and altmetrics.
 
-## Article Corpus
+## Web of Science
+
+### Article Corpus
 
 Articles were derived from the in-house Web of Science (WOS) database
-maintained by CWTS.
+maintained by CWTS ([query](queries/create_table_wos_items.sql)).
 
-The following tables were used:
+The following tables were used to build the article corpus:
 
-  - wosdb.dbo.UT (source item)
-  - wosdb.dbo.UI (source issue)
-  - wosdb.dbo.AR (additional item identifier)
+  - woskb.dbo.cwts\_ut
+  - woskb.dbo.cwts\_pub\_details
 
-Articles were limited to those published in publication years 2012-2018,
-articles published in journals, ‘Article’ and ‘Review’ document types,
-and articles with valid (non-null) DOIs. DOIs were converted to
-lowercase for matching with other datasets (e.g. Unpaywall,
-Altmetric.com).
+Extracted fields included:
 
-A table containing relevant items was extracted with the SQL query
-[create\_table\_wos\_items.sql](queries/create_table_wos_items.sql).
+  - ut
+  - doi (limited to non-null values)
+  - year (limited to 2012:2018)
+  - n\_authors
+  - n\_institutes
+  - n\_countries
+  - source (journal name)
+  - doc type (limited to ‘Article’ and ‘Review’)
+
+DOIs were converted to lowercase for matching with other datasets
+(e.g. Unpaywall, Altmetric.com). A small number of DOIs (N \~ 250) were
+found to include a comma in the DOI string (causing issues with .csv
+export) and were thus removed.
+
+##### Distribution of WOS articles per year ([query](#))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+### Author Countries
+
+ISO Alpha-2 country codes of **first** authors were extracted for the
+set of articles defined above
+([query](create_table_wos_first_authors.sql)), combining the following
+tables:
+
+  - userdb\_frasernm.dbo.wos\_items (as defined above)
+  - wosaddr1913.dbo.pub\_author\_affiliation
+  - wosaddr1913.dbo.pub\_affiliation
+  - wosaddr1913.dbo.country
+
+Where authors were affiliated with more than one country, country
+affiliations were weighted accordingly (e.g. an author belonging to the
+UK and US would count as 0.5 towards the UK, and 0.5 towards the US).
+
+### Subject Classifications
 
 ## OA Classification
 
@@ -41,8 +69,14 @@ The following tables were used:
   - unpaywall\_2019apr\_json.dbo.pub\_oa\_location (article oa location
     details)
 
-OA classification was initially conducted following the workflow
-detailed in Figure 1 from [Robinson-Garcia et
+Articles were limited to those with a publication date between 2010 and
+2019. This is slightly more inclusive than the WOS articles (2012-2019),
+to account for potential differences in recorded publication years
+between the two datasets (and thus ensures maximum coverage of WoS
+articles in the Unpaywall dataset).
+
+OA classification was first conducted following the workflow detailed in
+Figure 1 from [Robinson-Garcia et
 al. (2019)](https://arxiv.org/abs/1906.03840):
 
 ![robinson\_garcia\_unpaywall\_classification](figures/external/robinson_garcia_unpaywall_classification.PNG)
@@ -59,9 +93,7 @@ in two ways:
   - Articles hosted on PubMed Central (PMC) are, however, not classified
     as Green OA *if* they are available through another OA outlet. As
     authors do not submit manuscripts to PMC directly, it is not a
-    ‘self-archiving’ repository in the ‘traditional’ sense, and may
-    coincide largely with Gold OA journals (e.g. all articles in PLOS
-    journals are also available in PMC).
+    ‘self-archiving’ repository in the ‘traditional’ sense.
 
 Some implications of these two points are considered below.
 
@@ -100,7 +132,7 @@ PMC appears to overlap most strongly (and overlap has grown most
 rapidly) with Gold OA, but also a non-negligible amount with Hybrid and
 Bronze OA.
 
-##### Should we exclude PMC from our analysis?
+#### Should we exclude PMC from our analysis?
 
 From these results there seems no ‘a priori’ reason to completely
 exclude PMC. Even though authors do not deposit work to PMC, it remains
@@ -129,10 +161,12 @@ shown:
 ![](documentation_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 Interestingly, Green OA growth is driven more strongly by articles which
-are also available at the corresponding journal page. The decrease in OA
-coverage after 2018 is in part due to the issues with PMC coverage
-documented above, and also likely due to journal embargo periods. A more
-fine-grained analysis shows the share of Green OA in each journal type:
+are also available at the corresponding journal page. The decrease in
+Green OA coverage after 2018 is in part due to the issues with PMC
+coverage documented above, and also likely due to journal embargo
+periods. A more fine-grained analysis shows, for the articles available
+at the journal page, the number of articles contributing to Green OA for
+each journal type:
 
 ![](documentation_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
@@ -142,14 +176,18 @@ Interestingly, the contribution of Bronze OA articles over this time
 period remains relatively static, and even falls marginally from 2014
 onwards.
 
-##### Should Green OA articles be labelled at a more granular level?
+#### Should Green OA articles be labelled at a more granular level?
 
 …to discuss…
 
 ### Open Access shares
 
+Including all data from Unpaywall:
+
+![](documentation_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
+
 ## Altmetrics
 
-### Platforms
+## Altmetrics coverage
 
-### Indicators
+### Altmetrics counts
