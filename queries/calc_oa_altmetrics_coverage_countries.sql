@@ -2,9 +2,9 @@ SET NOCOUNT ON;
 
 /* Calculate coverage of each altmetric indicator in OA versus non-OA publications grouped by subject classification*/
 SELECT
-	t4.LR_main_field,
+	t4.country,
 	CASE WHEN t1.closed = 1 THEN 'closed' ELSE 'open' END AS type,
-	CAST(SUM(t4.weight) AS DECIMAL) AS n_items,
+	CAST(SUM(t4.country_weight) AS DECIMAL) AS n_items,
 	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS n_blog,
 	SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 END) AS n_facebook,
 	SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 END) AS n_news,
@@ -22,10 +22,10 @@ INNER JOIN
 ON
 	t2.doi = t3.doi
 INNER JOIN
-	userdb_frasernm.dbo.wos_classification t4
+	userdb_frasernm.dbo.wos_first_author_countries t4
 ON
 	t2.ut = t4.ut
 GROUP BY
-	t4.LR_main_field, t1.closed
+	t4.country, t1.closed
 ORDER BY 
-	t4.LR_main_field, t1.closed;
+	t4.country, t1.closed;

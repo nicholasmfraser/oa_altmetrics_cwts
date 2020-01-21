@@ -3,7 +3,7 @@ SET NOCOUNT ON;
 /* Calculate coverage of each altmetric indicator in OA versus non-OA publications */
 SELECT
 	t2.year,
-	CASE WHEN t1.closed = 0 THEN 'closed' ELSE 'open' END AS type,
+	CASE WHEN t1.closed = 1 THEN 'closed' ELSE 'open' END AS type,
 	COUNT(*) AS n_items,
 	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS n_blog,
 	SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 END) AS n_facebook,
