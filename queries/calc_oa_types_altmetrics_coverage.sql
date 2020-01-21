@@ -12,7 +12,7 @@ SELECT
 	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS n_twitter,
 	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS n_wikipedia
 FROM
-	userdb_frasernm.dbo.unpaywall_classification_nopmccor t1
+	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
 	userdb_frasernm.dbo.wos_items t2
 ON
@@ -36,7 +36,7 @@ SELECT
 	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS n_twitter,
 	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS n_wikipedia
 FROM
-	userdb_frasernm.dbo.unpaywall_classification_nopmccor t1
+	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
 	userdb_frasernm.dbo.wos_items t2
 ON
@@ -60,7 +60,7 @@ SELECT
 	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS n_twitter,
 	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS n_wikipedia
 FROM
-	userdb_frasernm.dbo.unpaywall_classification_nopmccor t1
+	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
 	userdb_frasernm.dbo.wos_items t2
 ON
@@ -84,7 +84,7 @@ SELECT
 	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS n_twitter,
 	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS n_wikipedia
 FROM
-	userdb_frasernm.dbo.unpaywall_classification_nopmccor t1
+	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
 	userdb_frasernm.dbo.wos_items t2
 ON
@@ -108,7 +108,7 @@ SELECT
 	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS n_twitter,
 	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS n_wikipedia
 FROM
-	userdb_frasernm.dbo.unpaywall_classification_nopmccor t1
+	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
 	userdb_frasernm.dbo.wos_items t2
 ON
