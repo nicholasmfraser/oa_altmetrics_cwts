@@ -2,7 +2,7 @@ SET NOCOUNT ON;
 
 /* Calculate coverage of each altmetric indicator in OA versus non-OA publications */
 SELECT
-	t2.year,
+	t4.LR_main_field,
 	CASE WHEN t1.closed = 0 THEN 'closed' ELSE 'open' END AS type,
 	COUNT(*) AS n_items,
 	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS n_blog,
@@ -21,7 +21,11 @@ INNER JOIN
 	userdb_frasernm.dbo.altmetric_counts t3
 ON
 	t2.doi = t3.doi
+INNER JOIN
+	userdb_frasernm.dbo.wos_classification t4
+ON
+	t2.ut = t4.ut
 GROUP BY
-	t2.year, t1.closed
+	t4.LR_main_field, t1.closed
 ORDER BY 
-	t2.year, t1.closed;
+	t4.LR_main_field, t1.closed;

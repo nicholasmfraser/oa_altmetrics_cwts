@@ -1,0 +1,12 @@
+﻿LR_main_field,type,n_items,n_blog,n_facebook,n_news,n_policy,n_twitter,n_wikipedia
+Biomedical and health sciences,closed,1692975,5,133827,330939,175167,45060,1145125,46548
+Biomedical and health sciences,open,1960183,5,80355,268288,104009,39504,1042504,29111
+Life and earth sciences,closed,636516,70126,119693,65540,18426,435538,28131
+Life and earth sciences,open,990532,43788,87641,37244,15066,391118,22854
+Mathematics and computer science,closed,281155,2472,7346,2487,646,60995,1922
+Mathematics and computer science,open,520232,1583,6117,2012,1077,34638,1834
+Physical sciences and engineering,closed,837701,5,50064,67273,38837,3113,395551,14644
+Physical sciences and engineering,open,2221118,5,24882,55107,30831,4674,347201,10430
+Social sciences and humanities,closed,312905,47492,88092,45741,24557,273211,10623
+Social sciences and humanities,open,658748,50159,102467,43560,27758,393540,14183
+
