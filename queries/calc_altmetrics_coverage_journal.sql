@@ -18,4 +18,6 @@ INNER JOIN
 ON
 	t1.doi = t2.doi
 GROUP BY 
-	t1.source;
+	t1.source
+HAVING
+	COUNT(*) >= 100;
