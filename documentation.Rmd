@@ -318,8 +318,7 @@ read_csv("data/altmetrics_coverage_year.csv") %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
-  group_by(year, indicator) %>%
-  summarize(coverage = sum(items_covered) / sum(items)) %>%
+  mutate(coverage = items_covered / items) %>%
   ggplot() +
   geom_bar(aes(x = year, y = coverage), 
            stat = "identity") +
@@ -419,8 +418,7 @@ read_csv("data/altmetrics_coverage_classification.csv") %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
-  group_by(classification, indicator) %>%
-  summarize(coverage = sum(items_covered) / sum(items)) %>%
+  mutate(coverage = items_covered / items) %>%
   ggplot() +
   geom_bar(aes(x = classification, y = coverage), 
            stat = "identity") +
@@ -489,7 +487,76 @@ read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
 
 ```
 
+### By Country
 
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_country.sql))
 
+```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
 
+read_csv("data/altmetrics_coverage_country.csv") %>%
+  arrange(desc(items)) %>%
+  top_n(50) %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(coverage = items_covered / items,
+         region = countrycode::countrycode(country, 
+                                           origin = "iso2c",
+                                           destination = "continent"),
+         country = countrycode::countrycode(country,
+                                            origin = "iso2c",
+                                            destination = "country.name")) %>%
+  ggplot(aes(x = reorder(country, desc(country)), y = coverage, fill = region)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(region ~ indicator, scales = "free_y", space = "free") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "",
+       y = "Coverage (%)",
+       fill = "") +
+  coord_flip() +
+  theme(strip.text.y = element_blank())
+
+```
+
+##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_country_oa.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
+
+top_countries <- read_csv("data/altmetrics_coverage_country.csv") %>%
+  arrange(desc(items)) %>%
+  top_n(50) %>%
+  pull(country)
+
+read_csv("data/altmetrics_coverage_country_oa.csv") %>%
+  filter(country %in% top_countries) %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed")),
+         coverage = items_covered / items,
+         region = countrycode::countrycode(country, 
+                                           origin = "iso2c",
+                                           destination = "continent"),
+         country = countrycode::countrycode(country,
+                                            origin = "iso2c",
+                                            destination = "country.name")) %>%
+  group_by(country, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(country, desc(country)), 
+                 y = rel_coverage, 
+                 fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  facet_grid(region ~ indicator, scales = "free_y", space = "free") +
+  scale_y_continuous(limits = c(0,4.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "",
+       y = "Relative Coverage",
+       fill = "") +
+  coord_flip() +
+  theme(strip.text.y = element_blank())
+
+```
 
