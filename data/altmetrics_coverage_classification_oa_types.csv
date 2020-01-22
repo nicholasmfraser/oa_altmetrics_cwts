@@ -1,0 +1,27 @@
+﻿classification,type,items,blogs,facebook,news,policies,twitter,wikipedia
+Biomedical and health sciences,closed,1960184,60239,219355,83876,29066,853646,23452
+Life and earth sciences,closed,990532,36463,69186,28941,11050,294614,19988
+Mathematics and computer science,closed,520232,1472,5849,1879,937,33240,1746
+Physical sciences and engineering,closed,2221119,23358,51158,28742,3462,320709,9696
+Social sciences and humanities,closed,658748,35955,68309,29775,20265,276092,10744
+Biomedical and health sciences,gold,635157,34455,92844,41908,6436,372557,10943
+Life and earth sciences,gold,275495,23397,41117,19171,3863,149896,9041
+Mathematics and computer science,gold,69606,577,2332,789,109,11973,308
+Physical sciences and engineering,gold,230005,7295,16328,8878,460,87950,2613
+Social sciences and humanities,gold,89975,8140,17510,7281,2945,52577,1543
+Biomedical and health sciences,hybrid,257109,17363,42638,25257,5477,141371,6897
+Life and earth sciences,hybrid,85330,8419,12710,7599,2024,44086,2981
+Mathematics and computer science,hybrid,48731,381,1056,413,123,6667,330
+Physical sciences and engineering,hybrid,143023,6772,11418,6386,423,62490,2206
+Social sciences and humanities,hybrid,35943,4519,7873,3998,2473,22546,1022
+Biomedical and health sciences,bronze,426698,27752,72770,41010,10455,227860,10898
+Life and earth sciences,bronze,157958,14838,21847,13389,3335,71690,7253
+Mathematics and computer science,bronze,27581,305,471,319,65,2648,196
+Physical sciences and engineering,bronze,126691,11653,8832,7723,369,50406,3992
+Social sciences and humanities,bronze,45404,6464,9748,6398,2967,26185,1426
+Biomedical and health sciences,green,617053,43404,106293,58847,13473,358794,15438
+Life and earth sciences,green,228478,22652,33039,19459,5623,119912,7962
+Mathematics and computer science,green,169506,1573,4465,1293,368,47072,1342
+Physical sciences and engineering,green,513062,38532,47280,23761,1302,290345,9689
+Social sciences and humanities,green,184223,17423,27726,15167,10458,102899,4280
+
