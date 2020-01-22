@@ -2,7 +2,7 @@ SET NOCOUNT ON;
 
 /* Calculate coverage of each altmetric indicator in each subject classification */
 SELECT
-	t3.country AS classification,
+	t3.country AS country,
 	CAST(SUM(t3.country_weight) AS DECIMAL) AS items,
 	CAST(SUM(CASE WHEN t2.count_blog = 0 THEN 0 ELSE 1 * t3.country_weight END) AS DECIMAL) AS blogs,
 	CAST(SUM(CASE WHEN t2.count_facebook = 0 THEN 0 ELSE 1 * t3.country_weight END) AS DECIMAL) AS facebook,
