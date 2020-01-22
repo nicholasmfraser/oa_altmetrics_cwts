@@ -228,18 +228,25 @@ to PMC. Interestingly, whilst the contribution of Hybrid OA has grown
 over this time period, the contribution of Bronze OA remains relatively
 static, and even falls marginally from 2014 onwards.
 
-### Recommendations for classifying Green OA
+### Recommendations for classifying Green OA in this study
 
-From the above results, a general recommendation is that Green OA cannot
-be considered a ‘black box’ in the context of understanding impact
+From the above results, a general recommendation is that Green OA should
+not be considered a ‘black box’ in the context of understanding impact
 metrics, as it includes multiple archiving routes, and interacts
-strongly with other forms of OA.
+strongly with other forms of OA. However, creating many other
+‘categories’ of Green OA (i.e. one category for Green OA including PMC
+and one excluding PMC) for analysis purposes is also sub-optimal, as
+categories become increasingly granular and large-scale mechanisms
+influencing impact are lost.
 
-An alternative may therefore be to create separate categories for Green
-OA including and excluding PMC articles, or for Green OA including and
-excluding journal-based OA.
-
-\*\* Should we do this?\*\*
+For simplification purposes, PMC is therefore excluded as a form of
+Green OA in the following study. The reasoning for this is based on: (1)
+that PMC clearly represents a different *form* of archiving than other
+forms of Green OA, i.e. the author takes no direct action to deposit
+their work, (2) that PMC largely overlaps with other forms of
+journal-based OA, in particular with Gold OA, which may skew results
+towards these OA forms, and (3) there exist data quality issues, with
+respect to missing PMC data in 2018 and 2019.
 
 ## Altmetric Coverage and OA
 
@@ -260,7 +267,15 @@ Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_year_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-10-1.png)<!-- --> In
+general terms, OA articles receive greater coverage in all altmetric
+indicators than non-OA articles. The advantage is surprisingly stable
+across altmetric indicators, with values of relative coverage between
+1.25-1.75 for OA articles (i.e. OA articles receive 25-75 % more
+coverage than the baseline coverage of all articles). For some
+indicators, e.g. Facebook, news articles, Twitter and Wikipedia, the OA
+advantage appears to weaken over time, whilst for blogs the advantage
+remains relatively stable, and even increases marginally for policies.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_year_oa_types.sql))
 
@@ -268,6 +283,14 @@ Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
 
 ### By Classification
 
-![](documentation_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_classification.sql))
 
-## To Do
+![](documentation_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_classification_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->

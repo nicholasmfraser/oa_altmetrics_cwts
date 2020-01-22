@@ -300,13 +300,11 @@ read_csv("data/unpaywall_classification_green_types.csv") %>%
 
 The results show that the contribution of Gold articles to Green OA shares has grown most strongly between 2010 and 2017. However, approximately 75% of the growth can be attributed to growth in deposits to PMC. Interestingly, whilst the contribution of Hybrid OA has grown over this time period, the contribution of Bronze OA remains relatively static, and even falls marginally from 2014 onwards. 
 
-### Recommendations for classifying Green OA
+### Recommendations for classifying Green OA in this study
 
-From the above results, a general recommendation is that Green OA cannot be considered a 'black box' in the context of understanding impact metrics, as it includes multiple archiving routes, and interacts strongly with other forms of OA.
+From the above results, a general recommendation is that Green OA should not be considered a 'black box' in the context of understanding impact metrics, as it includes multiple archiving routes, and interacts strongly with other forms of OA. However, creating many other 'categories' of Green OA (i.e. one category for Green OA including PMC and one excluding PMC) for analysis purposes is also sub-optimal, as categories become increasingly granular and large-scale mechanisms influencing impact are lost.
 
-An alternative may therefore be to create separate categories for Green OA including and excluding PMC articles, or for Green OA including and excluding journal-based OA. 
-
-** Should we do this?**
+For simplification purposes, PMC is therefore excluded as a form of Green OA in the following study. The reasoning for this is based on: (1) that PMC clearly represents a different *form* of archiving than other forms of Green OA, i.e. the author takes no direct action to deposit their work, (2) that PMC largely overlaps with other forms of journal-based OA, in particular with Gold OA, which may skew results towards these OA forms, and (3) there exist data quality issues, with respect to missing PMC data in 2018 and 2019.
 
 ## Altmetric Coverage and OA
 
@@ -361,6 +359,7 @@ read_csv("data/altmetrics_coverage_year_oa.csv") %>%
        fill = "")
 
 ```
+In general terms, OA articles receive greater coverage in all altmetric indicators than non-OA articles. The advantage is surprisingly stable across altmetric indicators, with values of relative coverage between 1.25-1.75 for OA articles (i.e. OA articles receive 25-75 % more coverage than the baseline coverage of all articles). For some indicators, e.g. Facebook, news articles, Twitter and Wikipedia, the OA advantage appears to weaken over time, whilst for blogs the advantage remains relatively stable, and even increases marginally for policies.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_year_oa_types.sql))
 
@@ -393,25 +392,14 @@ read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
 ### By Classification
 
-```{r echo = F, message = F, warning = F, fig.height = 10, fig.width = 12}
+```{r echo = F, message = F, warning = F}
 
+# A helper function to reclassify Leiden Ranking fields to abbreviated titles
 abbreviate_classifications <- function(d) {
   d %>%
-    mutate(classification = factor(LR_main_field,
+    mutate(classification = factor(classification,
            levels = c("Biomedical and health sciences",
                       "Life and earth sciences",
                       "Mathematics and computer science",
@@ -420,83 +408,88 @@ abbreviate_classifications <- function(d) {
            labels = c("BHS", "LES", "MCS", "PSE", "SSH")))
 }
 
-# Coverage per classification
-# Overall coverage
-p1 <- read_csv("data/oa_altmetrics_coverage_classification.csv") %>%
+```
+
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_classification.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_classification.csv") %>%
   abbreviate_classifications() %>%
-  pivot_longer(n_blog:n_wikipedia,
+  pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
-  mutate(indicator = factor(indicator,
-                            levels = c("n_blog", 
-                                       "n_facebook", 
-                                       "n_news",
-                                       "n_policy", 
-                                       "n_twitter", 
-                                       "n_wikipedia"),
-                            labels = c("Blogs", 
-                                       "Facebook", 
-                                       "News", 
-                                       "Policies",
-                                       "Twitter", 
-                                       "Wikipedia"))) %>%
   group_by(classification, indicator) %>%
-  summarize(coverage = sum(items_covered) / sum(n_items)) %>%
-  ggplot(aes(x = classification, y = coverage)) +
-  geom_bar(stat = "identity") +
+  summarize(coverage = sum(items_covered) / sum(items)) %>%
+  ggplot() +
+  geom_bar(aes(x = classification, y = coverage), 
+           stat = "identity") +
   facet_wrap(. ~ indicator, nrow = 1) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "",
-       y = "Coverage (%)",
-       title = "Overall Coverage")
+       y = "Coverage (%)")
 
-# Relative coverage per group
-p2 <- read_csv("data/oa_altmetrics_coverage_classification.csv") %>%
+```
+
+##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_classification_oa.csv") %>%
   abbreviate_classifications() %>%
-  pivot_longer(n_blog:n_wikipedia,
+  pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
-  mutate(indicator = factor(indicator,
-                            levels = c("n_blog",
-                                       "n_facebook",
-                                       "n_news",
-                                       "n_policy",
-                                       "n_twitter",
-                                       "n_wikipedia"),
-                            labels = c("Blogs",
-                                       "Facebook",
-                                       "News", 
-                                       "Policies",
-                                       "Twitter", 
-                                       "Wikipedia")),
-         type = factor(type, 
-                       levels = c("open", "closed"), 
-                       labels = c("OA", "Non-OA"))) %>%
-  mutate(coverage = items_covered / n_items) %>%
+  mutate(type = factor(type, levels = c("open", "closed")),
+         coverage = items_covered / items) %>%
   group_by(classification, indicator) %>%
-  mutate(rel_coverage = coverage / (sum(items_covered) / sum(n_items))) %>%
-  ggplot(aes(x = classification, y = rel_coverage)) +
-  geom_point(aes(fill = type), 
-             shape = 21, 
-             color = "grey10", 
-             size = 3, 
-             alpha = 0.75) +
-  facet_wrap(~ indicator, 
-             nrow = 1) +
-  geom_hline(yintercept = 1, 
-             linetype = "dotted") +
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = classification, y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  facet_wrap(~ indicator, nrow = 1) +
   scale_y_continuous(limits = c(0,2.5)) +
   scale_fill_manual(values = c(palette_color("open"), 
                                palette_color("closed"))) +
   labs(x = "",
        y = "Relative Coverage",
-       title = "Relative Coverage: All OA vs Non-OA",
        fill = "")
 
-egg::ggarrange(p1, p2, p2, ncol = 1)
- 
+```
+
+##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_classification_oa_types.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
+  abbreviate_classifications() %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green")),
+         coverage = items_covered / items) %>%
+  group_by(classification, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = classification, y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  facet_wrap(~ indicator, nrow = 1) +
+  scale_y_continuous(limits = c(0,3.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Relative Coverage",
+       fill = "")
+
 ```
 
 
-## To Do
+
+
 
