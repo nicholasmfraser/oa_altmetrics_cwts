@@ -304,3 +304,7 @@ remains relatively stable, and even increases marginally for policies.
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_country_oa.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_country_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
