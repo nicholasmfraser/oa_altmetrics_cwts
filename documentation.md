@@ -37,16 +37,6 @@ export) and were thus removed.
 
 ##### Distribution of WOS articles per year ([query](queries/calc_wos_items_year.sql))
 
-``` r
-read_csv("data/wos_items_year.csv") %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = n_items), stat = "identity") +
-  labs(x = "", 
-       y = "Articles") +
-  scale_x_continuous(breaks = 2012:2018) +
-  scale_y_continuous(labels = scales::comma)
-```
-
 ![](documentation_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ### Author Countries
@@ -66,21 +56,6 @@ affiliations were weighted accordingly (e.g. an author belonging to the
 UK and US would count as 0.5 towards the UK, and 0.5 towards the US).
 
 ##### Top 30 countries included in WOS article corpus ([query](queries/calc_wos_items_country.sql))
-
-``` r
-read_csv("data/wos_items_country.csv") %>%
-  mutate(country = countrycode::countrycode(country, "iso2c", "country.name"),
-         proportion = n_items / sum(n_items)) %>%
-  arrange(proportion) %>%
-  top_n(30) %>%
-  ggplot(aes(x = reorder(country, proportion), y = proportion)) +
-  geom_bar(stat = "identity") + 
-  labs(x = "",
-       y= "Articles") +
-  scale_y_continuous(labels = scales::percent) +
-  coord_flip() +
-  theme(text = element_text(size = 10))
-```
 
 ![](documentation_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
@@ -117,19 +92,6 @@ weight of 0.5 for both fields).
 
 ##### Proportion of WOS articles contained in each subject classification ([query](queries/calc_wos_items_classification.sql))
 
-``` r
-read_csv("data/wos_items_classification.csv") %>%
-  mutate(proportion = n_items / sum(n_items)) %>%
-  arrange(proportion) %>%
-  ggplot(aes(x = reorder(LR_main_field, proportion), y = proportion)) +
-  geom_bar(stat = "identity") + 
-  labs(x = "",
-       y= "Articles") +
-  scale_y_continuous(labels = scales::percent) +
-  coord_flip() +
-  theme(text = element_text(size = 10))
-```
-
 ![](documentation_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ## Altmetrics Data
@@ -154,38 +116,6 @@ Counts were initially extracted for the following altmetric indicators:
 
 Where no altmetric information was found for an article, counts were
 registered as zero.
-
-##### Overall coverage of WOS articles by different altmetric indicators per year ([query](queries/calc_altmetrics_coverage_year.sql))
-
-``` r
-read_csv("data/altmetrics_coverage_year.csv") %>%
-  pivot_longer(coverage_blog:coverage_wikipedia) %>%
-  mutate(name = factor(name,
-                       levels = c("coverage_blog", "coverage_facebook",
-                                  "coverage_news", "coverage_policy",
-                                  "coverage_twitter", "coverage_wikipedia"),
-                       labels = c("Blogs", "Facebook", "News", "Policies",
-                                  "Twitter", "Wikipedia"))) %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = value), stat = "identity") +
-  facet_wrap(. ~ name) +
-  labs(x = "", 
-       y = "Coverage") +
-  scale_x_continuous(breaks = 2012:2018) +
-  scale_y_continuous(labels = scales::percent) +
-  theme(legend.position = "none")
-```
-
-![](documentation_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
-
-The highest coverage is observed in Twitter, followed by Facebook, then
-news and blogs, Wikipedia and policies. Different temporal trends are
-observed for each indicator, e.g. Twitter coverage increases between
-2012 and 2016, which may reflect rapid user growth on the platform
-itself. Conversely, policy citations decrease over time, likely because
-policy citations take longer to accrue (\~years) than mentions on social
-media (\~days to weeks) (see [Fang and
-Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
 
 ## OA Classification
 
@@ -239,23 +169,7 @@ alternative kind of OA
 
 ##### Green OA articles in Unpaywall including and excluding PMC ([query](queries/calc_unpaywall_classification_pmc_comparison.sql))
 
-``` r
-read_csv("data/unpaywall_classification_pmc_comparison.csv",
-         col_types = "nln") %>%
-  mutate(pmc_corrected = factor(pmc_corrected,
-                                levels = c(T, F))) %>%
-  ggplot(aes(x = year, y = green, fill = pmc_corrected)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "", 
-       y = "Green OA articles",
-       fill = "Excludes PMC") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("dark green"),
-                               palette_color("light green")))
-```
-
-![](documentation_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 PMC clearly contributes a large proportion of Green OA from 2010 to
 2017. In 2018 and 2019, no PMC articles are found to contribute to Green
@@ -270,27 +184,7 @@ issue further. Contact Unpaywall?\]
 
 ##### Overlap of articles in PMC with journal-based OA types ([query](queries/calc_unpaywall_classification_pmc_overlap.sql))
 
-``` r
-read_csv("data/unpaywall_classification_pmc_overlap.csv") %>%
-  pivot_longer(closed:bronze) %>%
-  # there is no overlap between closed and PMC
-  filter(name != "closed") %>%
-  mutate(type = factor(name,
-                       levels = c("gold", "hybrid", "bronze"))) %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = value, fill = type),
-           stat = "identity", position = "dodge", width = 0.75) +
-  labs(x = "", 
-       y = "Articles",
-       fill = "OA Type") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("gold"),
-                               palette_color("hybrid"),
-                               palette_color("bronze")))
-```
-
-![](documentation_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 PMC appears to overlap most strongly (and overlap has grown most
 rapidly) with Gold OA, but also a non-negligible amount with Hybrid and
@@ -315,7 +209,7 @@ of the corresponding journal article.
 
 ##### Number of Green OA articles that are open and closed at the corresponding journal page ([query](queries/calc_unpaywall_classification_green_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 It appears that Green OA growth is more strongly represented by articles
 which are also available at the corresponding journal page, than closed
@@ -325,7 +219,7 @@ with Gold OA, and to a lesser extent with Hybrid and Bronze OA.
 
 ##### Number of Green OA articles published in different types of OA journals ([query](queries/calc_unpaywall_classification_green_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 The results show that the contribution of Gold articles to Green OA
 shares has grown most strongly between 2010 and 2017. However,
@@ -341,18 +235,39 @@ be considered a ‘black box’ in the context of understanding impact
 metrics, as it includes multiple archiving routes, and interacts
 strongly with other forms of OA.
 
-Even though authors do not deposit work to PMC, it remains an open
-repository and discovery tool and thus from the reader perspective may
-have an influence on impact. However, the strong overlap between PMC and
-Gold OA means that including PMC articles within Green OA will lead to a
-bias towards Gold OA. From the author perspective, PMC also represents a
-different demographic/category of authors, than authors who actively
-self-archive their work. An alternative may therefore be to create
-separate categories for Green OA including and excluding PMC articles,
-or for Green OA including and excluding journal-based OA.
+An alternative may therefore be to create separate categories for Green
+OA including and excluding PMC articles, or for Green OA including and
+excluding journal-based OA.
 
-### Open Access shares
+\*\* Should we do this?\*\*
 
-Including all data from Unpaywall:
+## Altmetric Coverage and OA
 
-![](documentation_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->![](documentation_files/figure-gfm/unnamed-chunk-10-6.png)<!-- -->
+### By Year
+
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_year.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+The highest coverage is observed in Twitter, followed by Facebook, then
+news and blogs, Wikipedia and policies. Different temporal trends are
+observed for each indicator, e.g. Twitter coverage increases between
+2012 and 2016, which may reflect rapid user growth on the platform
+itself. Conversely, policy citations decrease over time, likely because
+policy citations take longer to accrue (\~years) than mentions on social
+media (\~days to weeks) (see [Fang and
+Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
+
+##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_year_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_year_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+### By Classification
+
+![](documentation_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+## To Do

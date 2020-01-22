@@ -4,18 +4,21 @@ author: Nicholas Fraser
 output: github_document
 ---
 
-```{r echo = F, include = F}
+```{r echo = F, include = F, message = F, warning = F}
 # Load necessary libraries
 library(tidyverse)
 
 # Set chart themes
-theme_set(theme_minimal() +
+theme_set(theme_light() +
           theme(text = element_text(size=12),
                 axis.text.x = element_text(angle=45, hjust=1),
                 axis.title.x = element_text(margin = margin(t = 15, unit = "pt")),
                 axis.title.y = element_text(margin = margin(r = 15, unit = "pt")),
                 plot.title = element_text(margin = margin(t = 5, b = 15, unit = "pt"),
-                                          hjust = 0.5)))
+                                          hjust = 0.5),
+                panel.spacing = unit(1, "lines"),
+                strip.background = element_blank(),
+                strip.text = element_text(colour = "grey10")))
 
 # Color palette
 # From https://www.materialui.co/colors
@@ -69,7 +72,7 @@ DOIs were converted to lowercase for matching with other datasets (e.g. Unpaywal
 
 ##### Distribution of WOS articles per year ([query](queries/calc_wos_items_year.sql))
 
-```{r message = F}
+```{r echo = F, message = F, warning = F}
 
 read_csv("data/wos_items_year.csv") %>%
   ggplot() +
@@ -94,7 +97,7 @@ Where authors were affiliated with more than one country, country affiliations w
 
 ##### Top 30 countries included in WOS article corpus ([query](queries/calc_wos_items_country.sql))
 
-```{r message = F, warning = F}
+```{r echo = F, message = F, warning = F}
 
 read_csv("data/wos_items_country.csv") %>%
   mutate(country = countrycode::countrycode(country, "iso2c", "country.name"),
@@ -126,7 +129,7 @@ Note that publications can belong to more than one field, which are then weighte
 
 ##### Proportion of WOS articles contained in each subject classification ([query](queries/calc_wos_items_classification.sql))
 
-```{r message = F, warning = F}
+```{r echo = F, message = F, warning = F}
 
 read_csv("data/wos_items_classification.csv") %>%
   mutate(proportion = n_items / sum(n_items)) %>%
@@ -161,32 +164,6 @@ Counts were initially extracted for the following altmetric indicators:
 
 Where no altmetric information was found for an article, counts were registered as zero.
 
-##### Overall coverage of WOS articles by different altmetric indicators per year ([query](queries/calc_altmetrics_coverage_year.sql))
-
-
-```{r message = F, warning = F}
-
-read_csv("data/altmetrics_coverage_year.csv") %>%
-  pivot_longer(coverage_blog:coverage_wikipedia) %>%
-  mutate(name = factor(name,
-                       levels = c("coverage_blog", "coverage_facebook",
-                                  "coverage_news", "coverage_policy",
-                                  "coverage_twitter", "coverage_wikipedia"),
-                       labels = c("Blogs", "Facebook", "News", "Policies",
-                                  "Twitter", "Wikipedia"))) %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = value), stat = "identity") +
-  facet_wrap(. ~ name) +
-  labs(x = "", 
-       y = "Coverage") +
-  scale_x_continuous(breaks = 2012:2018) +
-  scale_y_continuous(labels = scales::percent) +
-  theme(legend.position = "none")
-
-```
-
-The highest coverage is observed in Twitter, followed by Facebook, then news and blogs, Wikipedia and policies. Different temporal trends are observed for each indicator, e.g. Twitter coverage increases between 2012 and 2016, which may reflect rapid user growth on the platform itself. Conversely, policy citations decrease over time, likely because policy citations take longer to accrue (~years) than mentions on social media (~days to weeks) (see [Fang and Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
-
 ## OA Classification
 
 OA classification was conducted using data from Unpaywall. Unpaywall data (from the April 2019 data dump) has been parsed into a relational (SQL) database at CWTS. 
@@ -215,7 +192,7 @@ To test the influence of the inclusion/exclusion of articles contained in PMC on
 
 ##### Green OA articles in Unpaywall including and excluding PMC ([query](queries/calc_unpaywall_classification_pmc_comparison.sql))
 
-```{r message = F, warning = F}
+```{r echo = F, message = F, warning = F}
 
 read_csv("data/unpaywall_classification_pmc_comparison.csv",
          col_types = "nln") %>%
@@ -236,7 +213,7 @@ PMC clearly contributes a large proportion of Green OA from 2010 to 2017. In 201
 
 ##### Overlap of articles in PMC with journal-based OA types ([query](queries/calc_unpaywall_classification_pmc_overlap.sql))
 
-```{r message = F, warning = F}
+```{r echo = F, message = F, warning = F}
 
 read_csv("data/unpaywall_classification_pmc_overlap.csv") %>%
   pivot_longer(closed:bronze) %>%
@@ -266,8 +243,8 @@ Following the classification procedure of Robinson-Garcia et al. (2019), Green O
 
 ##### Number of Green OA articles that are open and closed at the corresponding journal page ([query](queries/calc_unpaywall_classification_green_types.sql))
 
-```{r echo = F, message = F}
-# Compare 
+```{r echo = F, message = F, warning = F}
+
 read_csv("data/unpaywall_classification_green_types.csv") %>%
   pivot_longer(all_green:only_green) %>%
   filter(name %in% c("journal_oa_green", "only_green")) %>%
@@ -287,13 +264,14 @@ read_csv("data/unpaywall_classification_green_types.csv") %>%
   scale_y_continuous(labels = scales::comma) +
   scale_fill_manual(values = c(palette_color("light green"),
                                palette_color("dark green")))
+
 ```
 
 It appears that Green OA growth is more strongly represented by articles which are also available at the corresponding journal page, than closed articles. Note, however, that the above figures includes PMC articles - as shown in the previous section, there is also a large overlap of PMC with Gold OA, and to a lesser extent with Hybrid and Bronze OA.
 
 ##### Number of Green OA articles published in different types of OA journals ([query](queries/calc_unpaywall_classification_green_types.sql))
 
-```{r echo = F, message = F}
+```{r echo = F, message = F, warning = F}
 
 read_csv("data/unpaywall_classification_green_types.csv") %>%
   pivot_longer(all_green:only_green) %>%
@@ -326,137 +304,92 @@ The results show that the contribution of Gold articles to Green OA shares has g
 
 From the above results, a general recommendation is that Green OA cannot be considered a 'black box' in the context of understanding impact metrics, as it includes multiple archiving routes, and interacts strongly with other forms of OA.
 
-Even though authors do not deposit work to PMC, it remains an open repository and discovery tool and thus from the reader perspective may have an influence on impact. However, the strong overlap between PMC and Gold OA means that including PMC articles within Green OA will lead to a bias towards Gold OA. From the author perspective, PMC also represents a different demographic/category of authors, than authors who actively self-archive their work. An alternative may therefore be to create separate categories for Green OA including and excluding PMC articles, or for Green OA including and excluding journal-based OA.
+An alternative may therefore be to create separate categories for Green OA including and excluding PMC articles, or for Green OA including and excluding journal-based OA. 
 
-### Open Access shares
+** Should we do this?**
 
-Including all data from Unpaywall:
+## Altmetric Coverage and OA
 
-```{r echo = F, message = F}
+### By Year
 
-# Closed versus Open
-read_csv("data/unpaywall_classification.csv") %>%
-  pivot_longer(closed:only_green) %>%
-  filter(name %in% c("closed", "oa")) %>%
-  mutate(name = factor(name,
-                       levels = c("closed",
-                                  "oa"),
-                       labels = c("Closed",
-                                  "All OA"))) %>%
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_year.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_year.csv") %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  group_by(year, indicator) %>%
+  summarize(coverage = sum(items_covered) / sum(items)) %>%
   ggplot() +
-  geom_bar(aes(x = year, y = value, fill = name),
-           stat = "identity", position = "dodge", width = 0.75) +
-  labs(x = "", 
-       y = "Articles",
-       title = "Title here",
-       fill = "Access Type") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("closed"),
-                               palette_color("open")))
+  geom_bar(aes(x = year, y = coverage), 
+           stat = "identity") +
+  facet_wrap(. ~ indicator, nrow = 1) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  labs(x = "",
+       y = "Coverage (%)")
 
-read_csv("data/wos_unpaywall_classification.csv") %>%
-  pivot_longer(closed:only_green) %>%
-  filter(name %in% c("closed", "oa")) %>%
-  mutate(name = factor(name,
-                       levels = c("closed",
-                                  "oa"),
-                       labels = c("Closed",
-                                  "All OA"))) %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = value, fill = name),
-           stat = "identity", position = "dodge", width = 0.75) +
-  labs(x = "", 
-       y = "Articles",
-       title = "Title here",
-       fill = "Access Type") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("closed"),
-                               palette_color("open")))
-  
+```
 
-# By OA Journal Type
-read_csv("data/unpaywall_classification.csv") %>%
-  pivot_longer(closed:only_green) %>%
-  filter(name %in% c("closed", "gold", "hybrid", "bronze", "green")) %>%
-  mutate(name = factor(name,
-                       levels = c("closed", "gold", "hybrid", "bronze", "green"),
-                       labels = c("Closed", "Gold", "Hybrid", "Bronze", "Green"))) %>%
+The highest coverage is observed in Twitter, followed by Facebook, then news and blogs, Wikipedia and policies. Different temporal trends are observed for each indicator, e.g. Twitter coverage increases between 2012 and 2016, which may reflect rapid user growth on the platform itself. Conversely, policy citations decrease over time, likely because policy citations take longer to accrue (~years) than mentions on social media (~days to weeks) (see [Fang and Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
+
+##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_year_oa.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_year_oa.csv") %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed")),
+         coverage = items_covered / items) %>%
+  group_by(year, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
-  geom_bar(aes(x = year, y = value, fill = name),
-           stat = "identity", position = "dodge", width = 0.75) +
-  labs(x = "", 
-       y = "Articles",
-       title = "Title here",
-       fill = "Access Type") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("closed"),
+  geom_point(aes(x = year, y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  facet_wrap(~ indicator, nrow = 1) +
+  scale_y_continuous(limits = c(0,2)) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "",
+       y = "Relative Coverage",
+       fill = "")
+
+```
+
+##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_year_oa_types.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green")),
+         coverage = items_covered / items) %>%
+  group_by(year, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = year, y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  facet_wrap(~ indicator, nrow = 1) +
+  scale_y_continuous(limits = c(0,2)) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
                                palette_color("gold"),
                                palette_color("hybrid"),
                                palette_color("bronze"),
-                               palette_color("green")))
-
-read_csv("data/wos_unpaywall_classification.csv") %>%
-  pivot_longer(closed:only_green) %>%
-  filter(name %in% c("closed", "gold", "hybrid", "bronze", "green")) %>%
-  mutate(name = factor(name,
-                       levels = c("closed", "gold", "hybrid", "bronze", "green"),
-                       labels = c("Closed", "Gold", "Hybrid", "Bronze", "Green"))) %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = value, fill = name),
-           stat = "identity", position = "dodge", width = 0.75) +
-  labs(x = "", 
-       y = "Articles",
-       title = "Title here",
-       fill = "Access Type") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("closed"),
-                               palette_color("gold"),
-                               palette_color("hybrid"),
-                               palette_color("bronze"),
-                               palette_color("green")))
-
-# Splitting Green OA types
-read_csv("data/unpaywall_classification.csv") %>%
-  pivot_longer(closed:only_green) %>%
-  filter(name %in% c("journal_green", "only_green")) %>%
-  mutate(name = factor(name,
-                       levels = c("only_green", "journal_green"),
-                       labels = c("Closed at journal page",
-                                  "Open at journal page"))) %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = value, fill = name),
-           stat = "identity", position = "dodge", width = 0.75) +
-  labs(x = "", 
-       y = "Articles",
-       title = "Green OA by journal article availability",
-       fill = "Article availability") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("light green"),
-                               palette_color("dark green")))
-
-read_csv("data/wos_unpaywall_classification.csv") %>%
-  pivot_longer(closed:only_green) %>%
-  filter(name %in% c("journal_green", "only_green")) %>%
-  mutate(name = factor(name,
-                       levels = c("only_green", "journal_green"),
-                       labels = c("Closed at journal page",
-                                  "Open at journal page"))) %>%
-  ggplot() +
-  geom_bar(aes(x = year, y = value, fill = name),
-           stat = "identity", position = "dodge", width = 0.75) +
-  labs(x = "", 
-       y = "Articles",
-       title = "Green OA by journal article availability",
-       fill = "Article availability") +
-  scale_x_continuous(breaks = 2010:2019) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(palette_color("light green"),
-                               palette_color("dark green")))
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Relative Coverage",
+       fill = "")
 
 ```
 
@@ -464,4 +397,106 @@ read_csv("data/wos_unpaywall_classification.csv") %>%
 
 
 
+
+
+
+
+
+
+
+
+### By Classification
+
+```{r echo = F, message = F, warning = F, fig.height = 10, fig.width = 12}
+
+abbreviate_classifications <- function(d) {
+  d %>%
+    mutate(classification = factor(LR_main_field,
+           levels = c("Biomedical and health sciences",
+                      "Life and earth sciences",
+                      "Mathematics and computer science",
+                      "Physical sciences and engineering",
+                      "Social sciences and humanities"),
+           labels = c("BHS", "LES", "MCS", "PSE", "SSH")))
+}
+
+# Coverage per classification
+# Overall coverage
+p1 <- read_csv("data/oa_altmetrics_coverage_classification.csv") %>%
+  abbreviate_classifications() %>%
+  pivot_longer(n_blog:n_wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(indicator = factor(indicator,
+                            levels = c("n_blog", 
+                                       "n_facebook", 
+                                       "n_news",
+                                       "n_policy", 
+                                       "n_twitter", 
+                                       "n_wikipedia"),
+                            labels = c("Blogs", 
+                                       "Facebook", 
+                                       "News", 
+                                       "Policies",
+                                       "Twitter", 
+                                       "Wikipedia"))) %>%
+  group_by(classification, indicator) %>%
+  summarize(coverage = sum(items_covered) / sum(n_items)) %>%
+  ggplot(aes(x = classification, y = coverage)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(. ~ indicator, nrow = 1) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "",
+       y = "Coverage (%)",
+       title = "Overall Coverage")
+
+# Relative coverage per group
+p2 <- read_csv("data/oa_altmetrics_coverage_classification.csv") %>%
+  abbreviate_classifications() %>%
+  pivot_longer(n_blog:n_wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(indicator = factor(indicator,
+                            levels = c("n_blog",
+                                       "n_facebook",
+                                       "n_news",
+                                       "n_policy",
+                                       "n_twitter",
+                                       "n_wikipedia"),
+                            labels = c("Blogs",
+                                       "Facebook",
+                                       "News", 
+                                       "Policies",
+                                       "Twitter", 
+                                       "Wikipedia")),
+         type = factor(type, 
+                       levels = c("open", "closed"), 
+                       labels = c("OA", "Non-OA"))) %>%
+  mutate(coverage = items_covered / n_items) %>%
+  group_by(classification, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(n_items))) %>%
+  ggplot(aes(x = classification, y = rel_coverage)) +
+  geom_point(aes(fill = type), 
+             shape = 21, 
+             color = "grey10", 
+             size = 3, 
+             alpha = 0.75) +
+  facet_wrap(~ indicator, 
+             nrow = 1) +
+  geom_hline(yintercept = 1, 
+             linetype = "dotted") +
+  scale_y_continuous(limits = c(0,2.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "",
+       y = "Relative Coverage",
+       title = "Relative Coverage: All OA vs Non-OA",
+       fill = "")
+
+egg::ggarrange(p1, p2, p2, ncol = 1)
+ 
+```
+
+
+## To Do
 
