@@ -7,6 +7,18 @@ Nicholas Fraser
 This notebook contains documentation for the study on the relationship
 between Open Access (OA) and altmetrics.
 
+## Research Questions
+
+  - **RQ1**: Do OA articles receive more altmetric attention than non-OA
+    articles?
+  - **RQ2**: Do articles with different *types* of OA differ in the
+    altmetric attention they receive?
+  - **RQ3**: Which additional factors influence the relationship between
+    OA and altmetrics?
+
+With respect to RQ3, the following factors will be considered: - Time -
+Discipline - Country of authorship - Publication venue (journal)
+
 ## Web of Science
 
 ### Article Corpus
@@ -344,5 +356,7 @@ basis of their Journal Impact Factor.
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_journal.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_journal_oa.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->

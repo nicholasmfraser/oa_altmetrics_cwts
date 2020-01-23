@@ -46,6 +46,18 @@ palette_color <- function(color) {
 
 This notebook contains documentation for the study on the relationship between Open Access (OA) and altmetrics.
 
+## Research Questions
+
+- **RQ1**: Do OA articles receive more altmetric attention than non-OA articles?
+- **RQ2**: Do articles with different *types* of OA differ in the altmetric attention they receive?
+- **RQ3**: Which additional factors influence the relationship between OA and altmetrics?
+
+With respect to RQ3, the following factors will be considered:
+- Time
+- Discipline
+- Country of authorship
+- Publication venue (journal)
+
 ## Web of Science
 
 ### Article Corpus
@@ -623,8 +635,6 @@ read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
 
 There are 11,149 distinct journal titles associated with our WOS sample. In the following section, journals are grouped into percentiles on the basis of their Journal Impact Factor.
 
-##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_journal.sql))
-
 ```{r echo = F, message = F, warning = F}
 
 journal_ifs <- read_csv("data/journal_impact_factors.csv") %>%
@@ -633,6 +643,8 @@ journal_ifs <- read_csv("data/journal_impact_factors.csv") %>%
          if_bin = ntile(`if`, 10)*10)
 
 ```
+
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_journal.sql))
 
 ```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
 
@@ -654,6 +666,8 @@ read_csv("data/altmetrics_coverage_journal.csv") %>%
        fill = "")
 
 ```
+
+##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_journal_oa.sql))
 
 ```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
 
