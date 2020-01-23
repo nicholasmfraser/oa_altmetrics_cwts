@@ -16,8 +16,12 @@ between Open Access (OA) and altmetrics.
   - **RQ3**: Which additional factors influence the relationship between
     OA and altmetrics?
 
-With respect to RQ3, the following factors will be considered: - Time -
-Discipline - Country of authorship - Publication venue (journal)
+With respect to RQ3, the following factors will be considered:
+
+  - Time
+  - Discipline
+  - Country of authorship
+  - Publication venue (journal)
 
 ## Web of Science
 

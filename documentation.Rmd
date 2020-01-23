@@ -53,6 +53,7 @@ This notebook contains documentation for the study on the relationship between O
 - **RQ3**: Which additional factors influence the relationship between OA and altmetrics?
 
 With respect to RQ3, the following factors will be considered:
+
 - Time
 - Discipline
 - Country of authorship
