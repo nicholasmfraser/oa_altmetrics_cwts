@@ -6,7 +6,7 @@ SELECT
 	s1.ut, 
 	s1.country,
 	/* Calculate weight of country, e.g. for authors belonging to two countries, each has a weight of 0.5 */
-	1/CAST(COUNT(s1.country) OVER(PARTITION BY ut) AS FLOAT) AS country_weight
+	1/CAST(COUNT(s1.country) OVER(PARTITION BY ut) AS DECIMAL) AS country_weight
 INTO
 	userdb_frasernm.dbo.wos_first_author_countries
 FROM (
@@ -14,7 +14,7 @@ FROM (
 		t1.ut, 
 		t4.country_iso_alpha2_code as country
 	FROM
-		userdb_frasernm.dbo.wos_items t1
+		woskb.dbo.cwts_pub_details t1
 	INNER JOIN
 		wosaddr1913.dbo.pub_author_affiliation t2
 	ON
