@@ -117,6 +117,21 @@ Counts were initially extracted for the following altmetric indicators:
 Where no altmetric information was found for an article, counts were
 registered as zero.
 
+The following metrics are used for measuring altmetric activity:
+
+  - **Altmetric Coverage**: The number of articles that are mentioned in
+    a given altmetric source. E.g. if 30 articles out of 100 total
+    articles are mentioned on Twitter, the Twitter coverage is 30%.
+  - **Relative Altmetric Coverage**: The number of articles that are
+    mentioned in a given altmetric source **for a specific group**,
+    relative to the entire population. This can be explained with the
+    following example: a population of 100 articles consists of 40 OA
+    and 60 non-OA articles. The Twitter coverage of the entire
+    population is 30%, but the coverage of the OA group is 50%. Thus,
+    the relative coverage of the OA group is 50/30 = 1.66. An
+    interpretation is that OA articles are 66% more likely to receive OA
+    coverage than the population as a whole.
+
 ## OA Classification
 
 OA classification was conducted using data from Unpaywall. Unpaywall
@@ -289,6 +304,9 @@ remains relatively stable, and even increases marginally for policies.
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
 
+Coverage is defined as the number of articles that are mentioned by a
+particular altmetric sources The *relative coverage* per group is
+
 ![](documentation_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_classification_oa_types.sql))
@@ -308,3 +326,15 @@ remains relatively stable, and even increases marginally for policies.
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_country_oa_types.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+##### By Journal
+
+There are 11,149 distinct journal titles associated with our WOS sample.
+In the following section, journals are grouped into percentiles on the
+basis of their Journal Impact Factor.
+
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_journal.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+![](documentation_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->

@@ -164,6 +164,11 @@ Counts were initially extracted for the following altmetric indicators:
 
 Where no altmetric information was found for an article, counts were registered as zero.
 
+The following metrics are used for measuring altmetric activity:
+
+- **Altmetric Coverage**: The number of articles that are mentioned in a given altmetric source. E.g. if 30 articles out of 100 total articles are mentioned on Twitter, the Twitter coverage is 30%.
+- **Relative Altmetric Coverage**: The number of articles that are mentioned in a given altmetric source **for a specific group**, relative to the entire population. This can be explained with the following example: a population of 100 articles consists of 40 OA and 60 non-OA articles. The Twitter coverage of the entire population is 30%, but the coverage of the OA group is 50%. Thus, the relative coverage of the OA group is 50/30 = 1.66. An interpretation is that OA articles are 66% more likely to receive OA coverage than the population as a whole.
+
 ## OA Classification
 
 OA classification was conducted using data from Unpaywall. Unpaywall data (from the April 2019 data dump) has been parsed into a relational (SQL) database at CWTS. 
@@ -431,6 +436,9 @@ read_csv("data/altmetrics_coverage_classification.csv") %>%
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
 
+Coverage is defined as the number of articles that are mentioned by a particular altmetric sources The *relative coverage* per group is
+
+
 ```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
 
 read_csv("data/altmetrics_coverage_classification_oa.csv") %>%
@@ -494,8 +502,7 @@ read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
 ```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
 
 read_csv("data/altmetrics_coverage_country.csv") %>%
-  arrange(desc(items)) %>%
-  top_n(50) %>%
+  top_n(50, items) %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
@@ -523,8 +530,7 @@ read_csv("data/altmetrics_coverage_country.csv") %>%
 ```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
 
 top_countries <- read_csv("data/altmetrics_coverage_country.csv") %>%
-  arrange(desc(items)) %>%
-  top_n(50) %>%
+  top_n(50, items) %>%
   pull(country)
 
 read_csv("data/altmetrics_coverage_country_oa.csv") %>%
@@ -565,8 +571,7 @@ read_csv("data/altmetrics_coverage_country_oa.csv") %>%
 ```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
 
 top_countries <- read_csv("data/altmetrics_coverage_country.csv") %>%
-  arrange(desc(items)) %>%
-  top_n(50) %>%
+  top_n(50, items) %>%
   pull(country)
 
 read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
@@ -603,5 +608,71 @@ read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
        fill = "") +
   coord_flip() +
   theme(strip.text.y = element_blank())
+
+```
+
+##### By Journal
+
+There are 11,149 distinct journal titles associated with our WOS sample. In the following section, journals are grouped into percentiles on the basis of their Journal Impact Factor.
+
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_journal.sql))
+
+```{r echo = F, message = F, warning = F}
+
+journal_ifs <- read_csv("data/journal_impact_factors.csv") %>%
+  distinct(journal, `if`) %>%
+  mutate(journal = str_to_upper(journal),
+         if_bin = ntile(`if`, 10)*10)
+
+```
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_journal.csv") %>%
+  filter(items >= 100) %>%
+  inner_join(journal_ifs, by = "journal") %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  group_by(if_bin, indicator) %>%
+  mutate(coverage = sum(items_covered) / sum(items)) %>%
+  ggplot(aes(x = if_bin, y = coverage)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(. ~ indicator) +
+  scale_x_continuous(breaks = c(seq(0, 100, 20))) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Impact Factor Percentile",
+       y = "Coverage (%)",
+       fill = "")
+
+```
+
+```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+
+read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
+  filter(items >= 100) %>%
+  inner_join(journal_ifs, by = "journal") %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  group_by(if_bin, indicator, type) %>%
+  summarize(coverage = sum(items_covered) / sum(items),
+            items_covered = sum(items_covered),
+            items = sum(items)) %>%
+  ungroup() %>%
+  group_by(if_bin, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = if_bin, y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  facet_wrap(~ indicator, nrow = 1) +
+  scale_y_continuous(limits = c(0,2)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Impact Factor Percentile",
+       y = "Relative Coverage",
+       fill = "")
 
 ```
