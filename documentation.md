@@ -298,6 +298,14 @@ remains relatively stable, and even increases marginally for policies.
 
 ### By Classification
 
+##### Abbrevations for subject classifications
+
+  - BHS: Biomedical and Health Sciences
+  - LES: Life and Earth Sciences
+  - MCS: Mathematics and Computer Sciences
+  - PSE: Physical Sciences and Engineering
+  - SSH: Social Sciences and Humanities
+
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_classification.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->

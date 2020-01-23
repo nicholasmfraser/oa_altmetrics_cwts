@@ -398,6 +398,8 @@ read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
 
 ### By Classification
 
+##### Abbrevations for subject classifications
+
 ```{r echo = F, message = F, warning = F}
 
 # A helper function to reclassify Leiden Ranking fields to abbreviated titles
@@ -413,6 +415,12 @@ abbreviate_classifications <- function(d) {
 }
 
 ```
+
+- BHS: Biomedical and Health Sciences
+- LES: Life and Earth Sciences
+- MCS: Mathematics and Computer Sciences
+- PSE: Physical Sciences and Engineering
+- SSH: Social Sciences and Humanities
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_classification.sql))
 
