@@ -1,16 +1,16 @@
 SET NOCOUNT ON;
 
-/* Calculate coverage of each altmetric indicator in each subject classification */
+/* Calculate coverage of each altmetric indicator for each country and access type (closed, gold, hybrid, bronze, green) */
 SELECT
 	t4.country AS country,
 	'closed' AS type,
-	CAST(SUM(t4.country_weight) AS DECIMAL) AS items,
-	CAST(SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS blogs,
-	CAST(SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS facebook,
-	CAST(SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS news,
-	CAST(SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS policies,
-	CAST(SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS twitter,
-	CAST(SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS wikipedia
+	COUNT(*) AS items,
+	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS blogs,
+	SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 END) AS facebook,
+	SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 END) AS news,
+	SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 END) AS policies,
+	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS twitter,
+	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS wikipedia
 FROM
 	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
@@ -33,13 +33,13 @@ UNION ALL
 SELECT
 	t4.country AS country,
 	'gold' AS type,
-	CAST(SUM(t4.country_weight) AS DECIMAL) AS items,
-	CAST(SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS blogs,
-	CAST(SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS facebook,
-	CAST(SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS news,
-	CAST(SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS policies,
-	CAST(SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS twitter,
-	CAST(SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS wikipedia
+	COUNT(*) AS items,
+	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS blogs,
+	SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 END) AS facebook,
+	SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 END) AS news,
+	SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 END) AS policies,
+	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS twitter,
+	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS wikipedia
 FROM
 	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
@@ -62,13 +62,13 @@ UNION ALL
 SELECT
 	t4.country AS country,
 	'hybrid' AS type,
-	CAST(SUM(t4.country_weight) AS DECIMAL) AS items,
-	CAST(SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS blogs,
-	CAST(SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS facebook,
-	CAST(SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS news,
-	CAST(SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS policies,
-	CAST(SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS twitter,
-	CAST(SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS wikipedia
+	COUNT(*) AS items,
+	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS blogs,
+	SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 END) AS facebook,
+	SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 END) AS news,
+	SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 END) AS policies,
+	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS twitter,
+	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS wikipedia
 FROM
 	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
@@ -91,13 +91,13 @@ UNION ALL
 SELECT
 	t4.country AS country,
 	'bronze' AS type,
-	CAST(SUM(t4.country_weight) AS DECIMAL) AS items,
-	CAST(SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS blogs,
-	CAST(SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS facebook,
-	CAST(SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS news,
-	CAST(SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS policies,
-	CAST(SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS twitter,
-	CAST(SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS wikipedia
+	COUNT(*) AS items,
+	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS blogs,
+	SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 END) AS facebook,
+	SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 END) AS news,
+	SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 END) AS policies,
+	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS twitter,
+	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS wikipedia
 FROM
 	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
@@ -120,13 +120,13 @@ UNION ALL
 SELECT
 	t4.country AS country,
 	'green' AS type,
-	CAST(SUM(t4.country_weight) AS DECIMAL) AS items,
-	CAST(SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS blogs,
-	CAST(SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS facebook,
-	CAST(SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS news,
-	CAST(SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS policies,
-	CAST(SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS twitter,
-	CAST(SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 * t4.country_weight END) AS DECIMAL) AS wikipedia
+	COUNT(*) AS items,
+	SUM(CASE WHEN t3.count_blog = 0 THEN 0 ELSE 1 END) AS blogs,
+	SUM(CASE WHEN t3.count_facebook = 0 THEN 0 ELSE 1 END) AS facebook,
+	SUM(CASE WHEN t3.count_news = 0 THEN 0 ELSE 1 END) AS news,
+	SUM(CASE WHEN t3.count_policy = 0 THEN 0 ELSE 1 END) AS policies,
+	SUM(CASE WHEN t3.count_twitter = 0 THEN 0 ELSE 1 END) AS twitter,
+	SUM(CASE WHEN t3.count_wikipedia = 0 THEN 0 ELSE 1 END) AS wikipedia
 FROM
 	userdb_frasernm.dbo.unpaywall_classification_pmccor t1
 INNER JOIN
