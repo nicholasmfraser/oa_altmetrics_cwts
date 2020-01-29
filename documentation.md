@@ -29,7 +29,7 @@ With respect to RQ3, the following factors will be investigated:
   - Time
   - Discipline
   - Country of authorship
-  - Publication venue (journal)
+  - Publication venue (journal prestige)
 
 ## Data Sources
 
@@ -180,8 +180,8 @@ The following metrics are used for measuring altmetric activity:
     consists of 40 OA and 60 non-OA articles. The Twitter coverage of
     the entire population is 30%, but the coverage of the OA group is
     50%. Thus, the relative coverage of the OA group is 50/30 = 1.66. An
-    interpretation is that OA articles are 66% more likely to receive OA
-    coverage than the population as a whole.
+    interpretation is that OA articles are mentioned 66% more often on
+    Twitter than the population as a whole.
 
 ### OA Classification
 
@@ -207,8 +207,8 @@ al. (2019)](https://arxiv.org/abs/1906.03840):
 
 ![robinson\_garcia\_unpaywall\_classification](figures/external/robinson_garcia_unpaywall_classification.PNG)
 
-This classification diverges from the OA classification scheme [used by
-Unpaywall
+This classification scheme diverges from the OA classification scheme
+[used by Unpaywall
 directly](https://support.unpaywall.org/support/solutions/articles/44001777288-what-do-the-types-of-oa-status-green-gold-hybrid-and-bronze-mean-)
 in two ways:
 
@@ -237,9 +237,9 @@ alternative kind of OA
 
 ![](documentation_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
-PMC clearly contributes a large proportion of Green OA from 2010 to
-2017. In 2018 and 2019, no PMC articles are found to contribute to Green
-OA - notably, no articles are found for these year in the Unpaywall data
+PMC contributes a large proportion of Green OA from 2010 to 2017. In
+2018 and 2019, no PMC articles are found to contribute to Green OA -
+notably, no articles are found for these year in the Unpaywall data
 where the evidence is described as “oa repository (via pmcid lookup)”.
 However, when checking the same articles from 2018 and 2019 directly via
 the Unpaywall API, PMC *is* included as an evidence source. A
@@ -273,15 +273,16 @@ authors, than those who **only** self-archive? The impact dynamics are
 therefore likely different for Green OA, depending on the availability
 of the corresponding journal article.
 
-##### Number of Green OA articles that are open and closed at the corresponding journal page ([query](queries/calc_unpaywall_classification_green_types.sql))
+##### Number of articles in repositories that are open and closed at the corresponding journal page ([query](queries/calc_unpaywall_classification_green_types.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
-It appears that Green OA growth is more strongly represented by articles
-which are also available at the corresponding journal page, than closed
-articles. Note, however, that the above figures includes PMC articles -
-as shown in the previous section, there is also a large overlap of PMC
-with Gold OA, and to a lesser extent with Hybrid and Bronze OA.
+It appears tha growth in Green OA between 2010 and 2017 is stronger for
+articles which are also available at the corresponding journal page,
+than closed articles. Note, however, that the above figures includes PMC
+articles - as shown in the previous section, there is also a large
+overlap of PMC with Gold OA, and to a lesser extent with Hybrid and
+Bronze OA.
 
 ##### Number of Green OA articles published in different types of OA journals ([query](queries/calc_unpaywall_classification_green_types.sql))
 
@@ -292,8 +293,9 @@ shares has grown most strongly between 2010 and 2017. However,
 approximately 75% of the growth can be attributed to growth in deposits
 to PMC. Interestingly, whilst the contribution of Hybrid OA has grown
 over this time period, the contribution of Bronze OA remains relatively
-static, and even falls marginally from 2014 onwards. \#\#\#\#
-Recommendations for classifying Green OA
+static, and even falls marginally from 2014 onwards.
+
+#### Recommendations for classifying Green OA
 
 From the above results, a general recommendation is that Green OA should
 not be considered a ‘black box’ in the context of understanding impact
@@ -301,7 +303,7 @@ metrics, as it includes multiple archiving routes, and interacts
 strongly with other forms of OA. However, creating many other
 ‘categories’ of Green OA (i.e. one category for Green OA including PMC
 and one excluding PMC) for analysis purposes is also sub-optimal, as
-categories become increasingly granular and large-scale mechanisms
+categories will become increasingly granular and large-scale mechanisms
 influencing impact are lost.
 
 For simplification purposes, PMC is therefore excluded as a form of
@@ -322,6 +324,9 @@ indicators and their OA status is explored.
 
 #### By Year
 
+Note: Year refers to the WOS publication year (not the publication year
+stored by Unpaywall)
+
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_year.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
@@ -340,13 +345,14 @@ Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
 ![](documentation_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 In general terms, OA articles receive greater coverage in all altmetric
-indicators than non-OA articles. The advantage is surprisingly stable
-across altmetric indicators, with values of relative coverage between
-1.25-1.75 for OA articles (i.e. OA articles receive 25-75 % more
-coverage than the baseline coverage of all articles). For some
-indicators, e.g. Facebook, news articles, Twitter and Wikipedia, the OA
-advantage appears to weaken over time, whilst for blogs the advantage
-remains relatively stable, and even increases marginally for policies.
+indicators than non-OA articles for all years. The advantage is
+surprisingly stable across altmetric indicators, with values of relative
+coverage between 1.25-1.75 for OA articles (i.e. OA articles receive
+25-75 % more coverage than the baseline coverage of all articles). For
+some indicators, e.g. Facebook, news articles, Twitter and Wikipedia,
+the relative coverage of OA articles reduces over time, whilst for blogs
+relative coverage remains relatively stable, and even increases
+marginally for policies.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_year_oa_types.sql))
 
@@ -380,31 +386,41 @@ are abbreviated as follows:
 
 ![](documentation_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
-Higher altmetric coverage is observed in BS, LES and SSH than MCS and
-PSE. SSH has the highest coverage on blogs, whilst on Facebook and
-Twitter the highest coverage is observed in BHS. MCS has the lowest
-coverage across all indicators.
+Higher altmetric coverage is observed in BHS, LES and SSH than MCS and
+PSE. SSH has the highest coverage on blogs and in policy documents,
+whilst on Facebook and Twitter the highest coverage is observed in BHS.
+MCS has the lowest coverage across all indicators.
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 Interestingly, whilst PSE and MCS were shown in the previous figure to
-have the lowest coverage of all subject classifications, the *relative*
-coverage of OA publications in PSE and MCS is generally higher than in
-BHS, LES and SSH. An exception to this is in policy mentions, where
-relative coverage of OA publication in PSE is similar to LES and SSH,
-whilst in MCS the relative coverage of OA publications is only slightly
-greater than 1.
+have generally lower coverage across all indicators than other subject
+classifications, the relative coverage of OA publications in PSE and MCS
+is generally higher than in BHS, LES and SSH. An exception to this is in
+policy mentions, where relative coverage of OA publication in PSE is
+similar to LES and SSH, whilst in MCS the relative coverage of OA
+publications is only slightly greater than 1.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_classification_oa_types.sql))
 
 ![](documentation_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
+High coverage of PSE in OA publications appears to be driven mainly by
+Green and Bronze OA. With respect to blogs and Wikipedia, Bronze OA has
+by far the highest coverage, which appears to be driven strongly by a
+small selection of ‘high impact’ journals in Astronomy. Conversely, for
+Twitter and Facebook, the highest coverage in PSE is in Green OA - it
+would be interesting to investigate whether this is due to availability
+of Green OA on arXiv.
+
 #### By Country
 
-For the following analysis, the top 50 countries by publishing volume
-are included.
+For the following analysis, the top 5 countries per region (Africa,
+Americas, Europe, Asia, Oceania) by publishing volume are included. For
+Oceania, only Australia and New Zealand are included as publishing
+volumes for other countries (e.g. Fiji) are extremely low.
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_country.sql))
 
@@ -460,23 +476,74 @@ units in detail, and explore interactions between different units:
 
 ![](documentation_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
-#### A deeper look at Twitter at the country level: who is tweeting OA and non-OA articles?
+Given that policy documents focus heavily on Western, English-language
+countries, why is the coverage of Gold OA publications so low?
 
-Are OA articles more tweeted by authors in their own country?
+Do these countries publish more Gold OA than others?
 
-\-\> <https://www.frontiersin.org/articles/10.3389/frma.2016.00008/full>
+``` r
+big_countries <- c("US", "GB", "AU", "CA")
 
-“We find that papers published by those authors from Chinese
-affiliations have much lower visibility on the social web than articles
-from other countries, when there is no significant difference for the
-citations. Fewer of China’s publications get tweeted, and those tweeted
-publications attract less social attention. A geographical analysis of
-tweeters shows that scholarly articles get most of their social
-attention from the authors’ home countries”
+read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
+  mutate(is_big = case_when(
+    country %in% big_countries ~ T,
+    T ~ F
+  )) %>%
+  group_by(type, is_big) %>%
+  summarize(items = sum(items)) %>%
+  mutate(proportion = items / sum(items)) %>%
+  ggplot() +
+  geom_bar(aes(x = type, y = proportion, fill = is_big), stat = "identity")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   country = col_character(),
+    ##   type = col_character(),
+    ##   items = col_double(),
+    ##   blogs = col_double(),
+    ##   facebook = col_double(),
+    ##   news = col_double(),
+    ##   policies = col_double(),
+    ##   twitter = col_double(),
+    ##   wikipedia = col_double()
+    ## )
 
 ![](documentation_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
 
-## Study Limitations
+Can we correct the coverage-OA types graph, only including papers
+authored from US, GB, AU, CA?
 
-  - Observational evidence only
-  - Country/language preferences in Altmetric.com sources
+``` r
+read_csv("data/policy_countries_oa_types.csv") %>%
+  mutate(
+    author_country = case_when(
+      author_country %in% top_author_countries ~ author_country,
+      T ~ "Other"
+    ),
+    policy_country = case_when(
+      policy_country %in% top_policy_countries ~ policy_country,
+      T ~ "Other"
+    )) %>%
+  select(type, author_country, policy_country, n_items) %>%
+  ggforce::gather_set_data(1:3) %>%
+  ggplot(aes(x, id = id, split = y, value = n_items)) +
+    ggforce::geom_parallel_sets(aes(fill = author_country), 
+                                alpha = 0.5, sep = 0.03, n = 1000) +
+    ggforce::geom_parallel_sets_axes(axis.width = 0.1, fill = "grey99", 
+                                     color="grey75", sep = 0.03) +
+    ggforce::geom_parallel_sets_labels(angle = 0, colour = "black", sep = 0.03) +
+    theme_void() +
+    theme(legend.position = "none") +
+    viridis::scale_fill_viridis(discrete = T)
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   author_country = col_character(),
+    ##   policy_country = col_character(),
+    ##   n_items = col_double(),
+    ##   type = col_character()
+    ## )
+
+![](documentation_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
