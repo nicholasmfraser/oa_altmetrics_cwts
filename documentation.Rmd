@@ -44,24 +44,31 @@ palette_color <- function(color) {
 
 # Open Access and Altmetrics
 
-This notebook contains documentation for the study on the relationship between Open Access (OA) and altmetrics.
+This R notebook contains documentation for the study on the relationship between Open Access (OA) and altmetrics.
+
+## Background
+
+[TBC]
 
 ## Research Questions
+
+The study aims to address the following research questions: 
 
 - **RQ1**: Do OA articles receive more altmetric attention than non-OA articles?
 - **RQ2**: Do articles with different *types* of OA differ in the altmetric attention they receive?
 - **RQ3**: Which additional factors influence the relationship between OA and altmetrics?
+- **RQ4**: What are the limitations with current data sources in measuring the large-scale relationship between OA and altmetrics?
 
-With respect to RQ3, the following factors will be considered:
+With respect to RQ3, the following factors will be investigated:
 
 - Time
 - Discipline
 - Country of authorship
 - Publication venue (journal)
 
-## Web of Science
+## Data Sources
 
-### Article Corpus
+### Article Corpus (Web of Science)
 
 Articles were derived from the in-house Web of Science (WOS) database maintained by CWTS ([query](queries/create_table_wos_items.sql)).
 
@@ -81,7 +88,7 @@ Extracted fields included:
 - source (journal name)
 - doc type (limited to 'Article' and 'Review')
 
-DOIs were converted to lowercase for matching with other datasets (e.g. Unpaywall, Altmetric.com). A small number of DOIs (N ~ 250) were found to include a comma in the DOI string (causing issues with .csv export) and were thus removed.
+DOIs were converted to lowercase for matching with other datasets (e.g. Unpaywall, Altmetric.com).
 
 ##### Distribution of WOS articles per year ([query](queries/calc_wos_items_year.sql))
 
@@ -106,17 +113,16 @@ ISO Alpha-2 country codes of **first** authors were extracted for the set of art
 - wosaddr1913.dbo.pub_affiliation
 - wosaddr1913.dbo.country
 
-Where authors were affiliated with more than one country, country affiliations were weighted accordingly (e.g. an author belonging to the UK and US would count as 0.5 towards the UK, and 0.5 towards the US).
+Two potential methods for counting of country affiliations were explored: full counting and fractional counting. Full counting means that a paper is fully associated with any country affiliation of an author, e.g. if an author has two affiliations, one in the US and one in the UK, the paper would be counted as an article for the output of both countries. Fractional counting means that where an author has affiliations in multiple countries, an article is weighted by the number of country affiliations of the author, e.g. for an author with affiliations in the US and UK, an article would count as 0.5 towards the output of the UK, and 0.5 towards the output of the US.
 
-##### Top 30 countries included in WOS article corpus ([query](queries/calc_wos_items_country.sql))
+##### Top 50 countries included in the WOS article corpus by full counting ([query](queries/calc_wos_items_country_full_counting.sql))
 
-```{r echo = F, message = F, warning = F}
+```{r echo = F, message = F, warning = F, fig.height = 8, fig.width = 6}
 
-read_csv("data/wos_items_country.csv") %>%
+read_csv("data/wos_items_country_full_counting.csv") %>%
   mutate(country = countrycode::countrycode(country, "iso2c", "country.name"),
          proportion = n_items / sum(n_items)) %>%
-  arrange(proportion) %>%
-  top_n(30) %>%
+  top_n(50, proportion) %>%
   ggplot(aes(x = reorder(country, proportion), y = proportion)) +
   geom_bar(stat = "identity") + 
   labs(x = "",
@@ -126,6 +132,48 @@ read_csv("data/wos_items_country.csv") %>%
   theme(text = element_text(size = 10))
 
 ```
+
+##### Top 50 countries included in WOS article corpus by fractional counting ([query](queries/calc_wos_items_country_fractional_counting.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 8, fig.width = 6}
+
+read_csv("data/wos_items_country_fractional_counting.csv") %>%
+  mutate(country = countrycode::countrycode(country, "iso2c", "country.name"),
+         proportion = n_items / sum(n_items)) %>%
+  top_n(50, proportion) %>%
+  ggplot(aes(x = reorder(country, proportion), y = proportion)) +
+  geom_bar(stat = "identity") + 
+  labs(x = "",
+       y= "Articles") +
+  scale_y_continuous(labels = scales::percent) +
+  coord_flip() +
+  theme(text = element_text(size = 10))
+
+```
+
+##### Difference in country output using full versus fractional
+
+```{r echo = F, message = F, warning = F, fig.height = 8, fig.width = 6}
+
+read_csv("data/wos_items_country_fractional_counting.csv") %>%
+  inner_join(read_csv("data/wos_items_country_full_counting.csv"), 
+             by = "country") %>%
+  mutate(country = countrycode::countrycode(country, "iso2c", "country.name"),
+         delta = n_items.x/n_items.y) %>%
+  top_n(50, n_items.x) %>%
+  ggplot(aes(x = reorder(country, n_items.x), y = delta)) +
+  geom_bar(stat = "identity") + 
+  labs(x = "",
+       y= "Ratio Fractional Counting:Full Counting") +
+  scale_y_continuous() +
+  coord_flip() +
+  theme(text = element_text(size = 10))
+
+```
+
+#### Recommendations for counting methodology
+
+The results show that per-country output varies strongly depending on whether full or fractional counting is used (in some cases, e.g. in Saudi Arabia, counts are nearly 20 % lower when using fractional versus full counting). Potential reasons for this may be that authors from smaller countries, or countries with less well-developed scientific systems, are more likely to need to collaborate with partners from other countries, or that collaborations are driven by external motivations such as funding sources which explicitly require multi-country collaborations (e.g. EU FP7). To prevent penalisation of authors in these countries, for the following study full-counting at the country level is used.
 
 ### Subject Classifications
 
@@ -138,7 +186,7 @@ For this study, classification was conducted using the following tables ([query]
 - wosclassification1913.dbo.cluster_LR_main_field3
 - wosclassification1913.dbo.LR_main_field
 
-Note that publications can belong to more than one field, which are then weighted accordingly (i.e. a publication belonging to both "Biomedical and Health Sciences" and "Life and Earth Sciences" would be assigned a weight of 0.5 for both fields).
+For subject classification, we use only fractional counting to weight articles towards their respective subject (i.e. a publication belonging to both "Biomedical and Health Sciences" and "Life and Earth Sciences" would be assigned a weight of 0.5 for both fields).
 
 ##### Proportion of WOS articles contained in each subject classification ([query](queries/calc_wos_items_classification.sql))
 
@@ -155,10 +203,9 @@ read_csv("data/wos_items_classification.csv") %>%
   coord_flip() +
   theme(text = element_text(size = 10))
 
-
 ```
 
-## Altmetrics Data
+### Altmetrics Data
 
 Altmetrics data were derived from the CWTS in-house database of Altmetric.com (version October 2019) ([query](queries/create_table_altmetric_counts.sql)), using the following tables:
 
@@ -180,9 +227,9 @@ Where no altmetric information was found for an article, counts were registered 
 The following metrics are used for measuring altmetric activity:
 
 - **Altmetric Coverage**: The number of articles that are mentioned in a given altmetric source. E.g. if 30 articles out of 100 total articles are mentioned on Twitter, the Twitter coverage is 30%.
-- **Relative Altmetric Coverage**: The number of articles that are mentioned in a given altmetric source **for a specific group**, relative to the entire population. This can be explained with the following example: a population of 100 articles consists of 40 OA and 60 non-OA articles. The Twitter coverage of the entire population is 30%, but the coverage of the OA group is 50%. Thus, the relative coverage of the OA group is 50/30 = 1.66. An interpretation is that OA articles are 66% more likely to receive OA coverage than the population as a whole.
+- **Relative Altmetric Coverage**: The number of articles that are mentioned in a given altmetric source **for a specific subset of a population**, relative to the entire population. This can be explained with the following example: a population of 100 articles consists of 40 OA and 60 non-OA articles. The Twitter coverage of the entire population is 30%, but the coverage of the OA group is 50%. Thus, the relative coverage of the OA group is 50/30 = 1.66. An interpretation is that OA articles are 66% more likely to receive OA coverage than the population as a whole.
 
-## OA Classification
+### OA Classification
 
 OA classification was conducted using data from Unpaywall. Unpaywall data (from the April 2019 data dump) has been parsed into a relational (SQL) database at CWTS. 
 
@@ -204,7 +251,7 @@ This classification diverges from the OA classification scheme [used by Unpaywal
 
 Some implications of these two points are considered below.
 
-### PMC
+#### PMC
 
 To test the influence of the inclusion/exclusion of articles contained in PMC on Green OA rates, two classification procedures were conducted: one including all PMC articles in Green OA ([create_table_unpaywall_classification_nopmccor.sql](queries/create_table_unpaywall_classification_nopmccor.sql)), and one excluding PMC articles from Green OA when they match with an alternative kind of OA ([create_table_unpaywall_classification_pmccor.sql](queries/create_table_unpaywall_classification_pmccor.sql)).
 
@@ -255,7 +302,7 @@ read_csv("data/unpaywall_classification_pmc_overlap.csv") %>%
 
 PMC appears to overlap most strongly (and overlap has grown most rapidly) with Gold OA, but also a non-negligible amount with Hybrid and Bronze OA. Note, as previously, PMC articles are missing from 2018 and 2019.
 
-### Exclusivity of Green OA
+#### Exclusivity of Green OA
 
 Following the classification procedure of Robinson-Garcia et al. (2019), Green OA is treated as a non-exclusive category, i.e. an article is labelled as Green if it is available via a repository, regardless of its availability status at the journal page. However, some questions remain about this approach in the context of understanding OA impact - for example, from the readership perspective, will readers really use (and be more likely to cite/mention) an article if it is an OA repository, when it is also available directly on a journal page? And from the authors perspective - do the authors who publish in OA journals **and** self-archive their papers represent a different demographic/category of authors, than those who **only** self-archive? The impact dynamics are therefore likely different for Green OA, depending on the availability of the corresponding journal article.
 
@@ -317,34 +364,51 @@ read_csv("data/unpaywall_classification_green_types.csv") %>%
 ```
 
 The results show that the contribution of Gold articles to Green OA shares has grown most strongly between 2010 and 2017. However, approximately 75% of the growth can be attributed to growth in deposits to PMC. Interestingly, whilst the contribution of Hybrid OA has grown over this time period, the contribution of Bronze OA remains relatively static, and even falls marginally from 2014 onwards. 
-
-### Recommendations for classifying Green OA in this study
+#### Recommendations for classifying Green OA
 
 From the above results, a general recommendation is that Green OA should not be considered a 'black box' in the context of understanding impact metrics, as it includes multiple archiving routes, and interacts strongly with other forms of OA. However, creating many other 'categories' of Green OA (i.e. one category for Green OA including PMC and one excluding PMC) for analysis purposes is also sub-optimal, as categories become increasingly granular and large-scale mechanisms influencing impact are lost.
 
-For simplification purposes, PMC is therefore excluded as a form of Green OA in the following study. The reasoning for this is based on: (1) that PMC clearly represents a different *form* of archiving than other forms of Green OA, i.e. the author takes no direct action to deposit their work, (2) that PMC largely overlaps with other forms of journal-based OA, in particular with Gold OA, which may skew results towards these OA forms, and (3) there exist data quality issues, with respect to missing PMC data in 2018 and 2019.
+For simplification purposes, PMC is therefore excluded as a form of Green OA in this study. The reasoning for this is based on: (1) that PMC clearly represents a different *form* of archiving than other forms of Green OA, i.e. the author takes no direct action to deposit their work, (2) that PMC largely overlaps with other forms of journal-based OA, in particular with Gold OA, which may skew results towards these OA forms, and (3) there exist data quality issues, with respect to missing PMC data in 2018 and 2019.
 
-## Altmetric Coverage and OA
+## Results
 
-### By Year
+### Altmetric Coverage and OA
+
+Here the large-scale relationship between coverage of altmetric indicators and their OA status is explored.
+
+#### By Year
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_year.sql))
 
 ```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_year.csv") %>%
+p1 <- read_csv("data/altmetrics_coverage_year.csv") %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = items), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  labs(x = "",
+       y = "Articles")
+
+p2 <- read_csv("data/altmetrics_coverage_year.csv") %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
   mutate(coverage = items_covered / items) %>%
   ggplot() +
-  geom_bar(aes(x = year, y = coverage), 
-           stat = "identity") +
+  geom_point(aes(x = year, y = coverage), 
+             shape = 21, fill = "grey50", color = "grey10", size = 3, alpha = 0.5) +
   facet_wrap(. ~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
   scale_y_continuous(labels = scales::percent) +
   scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
   labs(x = "",
        y = "Coverage (%)")
+
+egg::ggarrange(p1 + theme(axis.title.x = element_blank(),
+                          plot.margin = margin(0, 30, 0, 0)),
+               p2, nrow = 1, widths = c(1,6))
 
 ```
 
@@ -352,9 +416,43 @@ The highest coverage is observed in Twitter, followed by Facebook, then news and
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_year_oa.sql))
 
-```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+```{r echo = F, message = F, warning = F, fig.height = 6, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_year_oa.csv") %>%
+p1 <- read_csv("data/altmetrics_coverage_year_oa.csv") %>%
+  mutate(type = factor(type, levels = c("closed", "open"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("open"))) +
+  labs(x = "",
+       y = "Articles",
+       fill = "")
+         
+p2 <- read_csv("data/altmetrics_coverage_year_oa.csv") %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed")),
+         coverage = items_covered / items) %>%
+  group_by(year, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = year, y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_wrap(~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "",
+       y = "Coverage (%)",
+       fill = "")
+
+p3 <- read_csv("data/altmetrics_coverage_year_oa.csv") %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
@@ -364,10 +462,10 @@ read_csv("data/altmetrics_coverage_year_oa.csv") %>%
   mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
   geom_point(aes(x = year, y = rel_coverage, fill = type), 
-             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
   geom_hline(yintercept = 1, linetype = "dotted") +
   facet_wrap(~ indicator, nrow = 1) +
-  scale_y_continuous(limits = c(0,2)) +
+  expand_limits(y = 0) +
   scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
   scale_fill_manual(values = c(palette_color("open"), 
                                palette_color("closed"))) +
@@ -375,14 +473,68 @@ read_csv("data/altmetrics_coverage_year_oa.csv") %>%
        y = "Relative Coverage",
        fill = "")
 
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          axis.title.x = element_blank(),
+                          plot.margin = margin(0, 30, 0, 0)), 
+               p2 + theme(legend.position = "top",
+                          axis.title.x = element_blank(),),
+               ggplot() + theme(panel.border = element_blank()),
+               p3 + theme(legend.position = "none",
+                          axis.title.x = element_blank()),
+               nrow = 2, ncol = 2, widths = c(1,6))
+
 ```
+
 In general terms, OA articles receive greater coverage in all altmetric indicators than non-OA articles. The advantage is surprisingly stable across altmetric indicators, with values of relative coverage between 1.25-1.75 for OA articles (i.e. OA articles receive 25-75 % more coverage than the baseline coverage of all articles). For some indicators, e.g. Facebook, news articles, Twitter and Wikipedia, the OA advantage appears to weaken over time, whilst for blogs the advantage remains relatively stable, and even increases marginally for policies.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_year_oa_types.sql))
 
-```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+```{r echo = F, message = F, warning = F, fig.height = 6, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
+p1 <- read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Articles",
+       fill = "")
+
+p2 <- read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green")),
+         coverage = items_covered / items) %>%
+  group_by(year, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = year, y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_wrap(~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Coverage (%)",
+       fill = "")
+
+
+p3 <- read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
@@ -393,10 +545,10 @@ read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
   mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
   geom_point(aes(x = year, y = rel_coverage, fill = type), 
-             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
   geom_hline(yintercept = 1, linetype = "dotted") +
   facet_wrap(~ indicator, nrow = 1) +
-  scale_y_continuous(limits = c(0,2)) +
+  expand_limits(y = 0) +
   scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
   scale_fill_manual(values = c(palette_color("closed"), 
                                palette_color("gold"),
@@ -407,9 +559,21 @@ read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
        y = "Relative Coverage",
        fill = "")
 
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          axis.title.x = element_blank(),
+                          plot.margin = margin(0, 30, 0, 0)), 
+               p2 + theme(legend.position = "top",
+                          axis.title.x = element_blank(),),
+               ggplot() + theme(panel.border = element_blank()),
+               p3 + theme(legend.position = "none",
+                          axis.title.x = element_blank()),
+               nrow = 2, ncol = 2, widths = c(1,6))
+
 ```
 
-### By Classification
+Different trends are observed within each type of OA. A broad generalisation is that for most indicators, with the exception of Twitter, Bronze OA 'performs' well with respect to relative coverage, whilst Gold OA performs poorly. However, the temporal trends are not entirely clear - for example, with respect to Facebook, the relative coverage of Gold OA was in fact the highest of all types of OA in 2012, but by 2018 the decreases to the lowest of all OA types. Policy documents in particular show a large separation in coverage between Gold OA and other types of OA - the reasons for this will be investigated in a later section.
+
+#### By Classification
 
 ##### Abbrevations for subject classifications
 
@@ -429,6 +593,8 @@ abbreviate_classifications <- function(d) {
 
 ```
 
+For the following section, names of individual subject classifications are abbreviated as follows:
+
 - BHS: Biomedical and Health Sciences
 - LES: Life and Earth Sciences
 - MCS: Mathematics and Computer Sciences
@@ -439,30 +605,77 @@ abbreviate_classifications <- function(d) {
 
 ```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_classification.csv") %>%
+p1 <- read_csv("data/altmetrics_coverage_classification.csv") %>%
+  abbreviate_classifications() %>%
+  ggplot() +
+  geom_bar(aes(x = classification, y = items), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = "",
+       y = "Articles")
+
+p2 <- read_csv("data/altmetrics_coverage_classification.csv") %>%
   abbreviate_classifications() %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
   mutate(coverage = items_covered / items) %>%
   ggplot() +
-  geom_bar(aes(x = classification, y = coverage), 
-           stat = "identity") +
+  geom_point(aes(x = classification, y = coverage), 
+             shape = 21, fill = "grey50", color = "grey10", size = 3, alpha = 0.5) +
   facet_wrap(. ~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "",
        y = "Coverage (%)")
 
+egg::ggarrange(p1 + theme(axis.title.x = element_blank(),
+                          plot.margin = margin(0, 30, 0, 0)),
+               p2, nrow = 1, widths = c(1,6))
+
 ```
+
+Higher altmetric coverage is observed in BS, LES and SSH than MCS and PSE. SSH has the highest coverage on blogs, whilst on Facebook and Twitter the highest coverage is observed in BHS. MCS has the lowest coverage across all indicators. 
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
 
-Coverage is defined as the number of articles that are mentioned by a particular altmetric sources The *relative coverage* per group is
+```{r echo = F, message = F, warning = F, fig.height = 6, fig.width = 12}
 
+p1 <- read_csv("data/altmetrics_coverage_classification_oa.csv") %>%
+  abbreviate_classifications() %>%
+  mutate(type = factor(type, levels = c("closed", "open"))) %>%
+  ggplot() +
+  geom_bar(aes(x = classification, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("open"))) +
+  labs(x = "",
+       y = "Articles",
+       fill = "")
+         
+p2 <- read_csv("data/altmetrics_coverage_classification_oa.csv") %>%
+  abbreviate_classifications() %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed")),
+         coverage = items_covered / items) %>%
+  group_by(classification, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = classification, y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_wrap(~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "",
+       y = "Coverage (%)",
+       fill = "")
 
-```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
-
-read_csv("data/altmetrics_coverage_classification_oa.csv") %>%
+p3 <- read_csv("data/altmetrics_coverage_classification_oa.csv") %>%
   abbreviate_classifications() %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
@@ -473,23 +686,78 @@ read_csv("data/altmetrics_coverage_classification_oa.csv") %>%
   mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
   geom_point(aes(x = classification, y = rel_coverage, fill = type), 
-             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
   geom_hline(yintercept = 1, linetype = "dotted") +
   facet_wrap(~ indicator, nrow = 1) +
-  scale_y_continuous(limits = c(0,2.5)) +
+  expand_limits(y = 0) +
   scale_fill_manual(values = c(palette_color("open"), 
                                palette_color("closed"))) +
   labs(x = "",
        y = "Relative Coverage",
        fill = "")
 
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          axis.title.x = element_blank(),
+                          plot.margin = margin(0, 30, 0, 0)), 
+               p2 + theme(legend.position = "top",
+                          axis.title.x = element_blank(),),
+               ggplot() + theme(panel.border = element_blank()),
+               p3 + theme(legend.position = "none",
+                          axis.title.x = element_blank()),
+               nrow = 2, ncol = 2, widths = c(1,6))
+
 ```
+
+Interestingly, whilst PSE and MCS were shown in the previous figure to have the lowest coverage of all subject classifications, the *relative* coverage of OA publications in PSE and MCS is generally higher than in BHS, LES and SSH. An exception to this is in policy mentions, where relative coverage of OA publication in PSE is similar to LES and SSH, whilst in MCS the relative coverage of OA publications is only slightly greater than 1. 
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_classification_oa_types.sql))
 
-```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+```{r echo = F, message = F, warning = F, fig.height = 6, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
+p1 <- read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
+  abbreviate_classifications() %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  ggplot() +
+  geom_bar(aes(x = classification, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Articles",
+       fill = "")
+
+p2 <- read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
+  abbreviate_classifications() %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green")),
+         coverage = items_covered / items) %>%
+  group_by(classification, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = classification, y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_wrap(~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Coverage (%)",
+       fill = "")
+
+
+p3 <- read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
   abbreviate_classifications() %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
@@ -501,10 +769,10 @@ read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
   mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
   geom_point(aes(x = classification, y = rel_coverage, fill = type), 
-             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
   geom_hline(yintercept = 1, linetype = "dotted") +
   facet_wrap(~ indicator, nrow = 1) +
-  scale_y_continuous(limits = c(0,3.5)) +
+  expand_limits(y = 0) +
   scale_fill_manual(values = c(palette_color("closed"), 
                                palette_color("gold"),
                                palette_color("hybrid"),
@@ -514,16 +782,55 @@ read_csv("data/altmetrics_coverage_classification_oa_types.csv") %>%
        y = "Relative Coverage",
        fill = "")
 
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          axis.title.x = element_blank(),
+                          plot.margin = margin(0, 30, 0, 0)), 
+               p2 + theme(legend.position = "top",
+                          axis.title.x = element_blank(),),
+               ggplot() + theme(panel.border = element_blank()),
+               p3 + theme(legend.position = "none",
+                          axis.title.x = element_blank()),
+               nrow = 2, ncol = 2, widths = c(1,6))
+
 ```
 
-### By Country
+#### By Country
+
+```{r echo = F, message = F, warning = F}
+
+# Select the top countries by publising volume
+top_countries <- read_csv("data/altmetrics_coverage_country.csv") %>%
+  top_n(50, items) %>%
+  pull(country)
+
+```
+
+For the following analysis, the top 50 countries by publishing volume are included.
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_country.sql))
 
-```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
+```{r echo = F, message = F, warning = F, fig.height = 8, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_country.csv") %>%
-  top_n(50, items) %>%
+p1 <- read_csv("data/altmetrics_coverage_country.csv") %>%
+  filter(country %in% top_countries) %>%
+  mutate(region = countrycode::countrycode(country, 
+                                           origin = "iso2c",
+                                           destination = "continent"),
+         country = countrycode::countrycode(country,
+                                            origin = "iso2c",
+                                            destination = "country.name")) %>%
+  ggplot() +
+  geom_bar(aes(x = reorder(country, desc(country)), y = items), stat = "identity") +
+  facet_grid(region ~ ., scales = "free_y", space = "free") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = "",
+       y = "Articles") +
+  coord_flip() +
+  theme(strip.text.y = element_blank())
+  
+p2 <- read_csv("data/altmetrics_coverage_country.csv") %>%
+  filter(country %in% top_countries) %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
@@ -534,27 +841,81 @@ read_csv("data/altmetrics_coverage_country.csv") %>%
          country = countrycode::countrycode(country,
                                             origin = "iso2c",
                                             destination = "country.name")) %>%
-  ggplot(aes(x = reorder(country, desc(country)), y = coverage, fill = region)) +
-  geom_bar(stat = "identity", position = "dodge") +
+  ggplot() +
+  geom_point(aes(x = reorder(country, desc(country)), y = coverage), 
+             shape = 21, fill = "grey50", color = "grey10", size = 3, alpha = 0.5) +
   facet_grid(region ~ indicator, scales = "free_y", space = "free") +
+  expand_limits(y = 0) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "",
-       y = "Coverage (%)",
-       fill = "") +
+       y = "Coverage (%)")  +
   coord_flip() +
   theme(strip.text.y = element_blank())
+
+egg::ggarrange(p1 + theme(plot.margin = margin(0, 30, 0, 0)),
+               p2, 
+               nrow = 1, 
+               widths = c(1,6))
 
 ```
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_country_oa.sql))
 
-```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
+```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 16}
 
-top_countries <- read_csv("data/altmetrics_coverage_country.csv") %>%
-  top_n(50, items) %>%
-  pull(country)
+p1 <- read_csv("data/altmetrics_coverage_country_oa.csv") %>%
+  filter(country %in% top_countries) %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed")),
+         region = countrycode::countrycode(country, 
+                                           origin = "iso2c",
+                                           destination = "continent"),
+         country = countrycode::countrycode(country,
+                                            origin = "iso2c",
+                                            destination = "country.name")) %>%
+  ggplot() +
+  geom_bar(aes(x = reorder(country, desc(country)), y = items, fill = type), 
+           stat = "identity") +
+  facet_grid(region ~ ., scales = "free_y", space = "free") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("open"),
+                               palette_color("closed"))) +
+  labs(x = "",
+       y = "Articles") +
+  coord_flip() +
+  theme(strip.text.y = element_blank())
 
-read_csv("data/altmetrics_coverage_country_oa.csv") %>%
+p2 <- read_csv("data/altmetrics_coverage_country_oa.csv") %>%
+  filter(country %in% top_countries) %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed")),
+         coverage = items_covered / items,
+         region = countrycode::countrycode(country, 
+                                           origin = "iso2c",
+                                           destination = "continent"),
+         country = countrycode::countrycode(country,
+                                            origin = "iso2c",
+                                            destination = "country.name")) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(country, desc(country)), y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_grid(region ~ indicator, scales = "free_y", space = "free") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(palette_color("open"),
+                               palette_color("closed"))) +
+  labs(x = "",
+       y = "Coverage (%)",
+       fill = "")  +
+  coord_flip() +
+  theme(strip.text.y = element_blank())
+
+p3 <- read_csv("data/altmetrics_coverage_country_oa.csv") %>%
   filter(country %in% top_countries) %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
@@ -570,32 +931,93 @@ read_csv("data/altmetrics_coverage_country_oa.csv") %>%
   group_by(country, indicator) %>%
   mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
-  geom_point(aes(x = reorder(country, desc(country)), 
-                 y = rel_coverage, 
-                 fill = type), 
-             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_point(aes(x = reorder(country, desc(country)), y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
   geom_hline(yintercept = 1, linetype = "dotted") +
   facet_grid(region ~ indicator, scales = "free_y", space = "free") +
-  scale_y_continuous(limits = c(0,4.5)) +
-  scale_fill_manual(values = c(palette_color("open"), 
+  expand_limits(y = 0) +
+  scale_fill_manual(values = c(palette_color("open"),
                                palette_color("closed"))) +
   labs(x = "",
        y = "Relative Coverage",
-       fill = "") +
+       fill = "")  +
   coord_flip() +
   theme(strip.text.y = element_blank())
+
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          plot.margin = margin(0, 10, 0, 0)), 
+               p2 + theme(legend.position = "top",
+                          plot.margin = margin(0, 10, 0, 0)),
+               p3 + theme(legend.position = "none"),
+               nrow = 1, ncol = 3, widths = c(1,6, 6))
 
 ```
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_country_oa_types.sql))
 
-```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 12}
+```{r echo = F, message = F, warning = F, fig.height = 12, fig.width = 16}
 
-top_countries <- read_csv("data/altmetrics_coverage_country.csv") %>%
-  top_n(50, items) %>%
-  pull(country)
+p1 <- read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
+  filter(country %in% top_countries) %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green")),
+         region = countrycode::countrycode(country, 
+                                           origin = "iso2c",
+                                           destination = "continent"),
+         country = countrycode::countrycode(country,
+                                            origin = "iso2c",
+                                            destination = "country.name")) %>%
+  ggplot() +
+  geom_bar(aes(x = reorder(country, desc(country)), y = items, fill = type), 
+           stat = "identity") +
+  facet_grid(region ~ ., scales = "free_y", space = "free") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Articles") +
+  coord_flip() +
+  theme(strip.text.y = element_blank())
 
-read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
+p2 <- read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
+  filter(country %in% top_countries) %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green")),
+         coverage = items_covered / items,
+         region = countrycode::countrycode(country, 
+                                           origin = "iso2c",
+                                           destination = "continent"),
+         country = countrycode::countrycode(country,
+                                            origin = "iso2c",
+                                            destination = "country.name")) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(country, desc(country)), y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_grid(region ~ indicator, scales = "free_y", space = "free") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Coverage (%)",
+       fill = "")  +
+  coord_flip() +
+  theme(strip.text.y = element_blank())
+
+p3 <- read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
   filter(country %in% top_countries) %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
@@ -612,13 +1034,11 @@ read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
   group_by(country, indicator) %>%
   mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
-  geom_point(aes(x = reorder(country, desc(country)), 
-                 y = rel_coverage, 
-                 fill = type), 
-             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_point(aes(x = reorder(country, desc(country)), y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
   geom_hline(yintercept = 1, linetype = "dotted") +
   facet_grid(region ~ indicator, scales = "free_y", space = "free") +
-  scale_y_continuous(limits = c(0,4.5)) +
+  expand_limits(y = 0) +
   scale_fill_manual(values = c(palette_color("closed"), 
                                palette_color("gold"),
                                palette_color("hybrid"),
@@ -626,22 +1046,41 @@ read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
                                palette_color("green"))) +
   labs(x = "",
        y = "Relative Coverage",
-       fill = "") +
+       fill = "")  +
   coord_flip() +
   theme(strip.text.y = element_blank())
 
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          plot.margin = margin(0, 10, 0, 0)), 
+               p2 + theme(legend.position = "top",
+                          plot.margin = margin(0, 10, 0, 0)),
+               p3 + theme(legend.position = "none"),
+               nrow = 1, ncol = 3, widths = c(1,6, 6))
+
 ```
 
-##### By Journal
+#### By Journal
 
-There are 11,149 distinct journal titles associated with our WOS sample. In the following section, journals are grouped into percentiles on the basis of their Journal Impact Factor.
+There are 11,149 distinct journal titles associated with our WOS sample. In the following section, journals are grouped into percentiles on the basis of their Journal Impact Factor (downloaded from Clarivate Analytics Journal Citation Reports), as a proxy for journal prestige.
+
+[To discuss: is JIF really a good proxy for journal prestige? Could we use some other measure? Should we correct for JIF variability between subject areas?]
 
 ```{r echo = F, message = F, warning = F}
 
 journal_ifs <- read_csv("data/journal_impact_factors.csv") %>%
-  distinct(journal, `if`) %>%
-  mutate(journal = str_to_upper(journal),
-         if_bin = ntile(`if`, 10)*10)
+  na.omit() %>%
+  mutate(journal = str_to_upper(journal)) %>%
+  distinct(journal, journal_if, year) %>%
+  group_by(journal) %>%
+  summarize(mean_if = mean(journal_if))
+
+join_and_bin_journal_ifs <- function(d) {
+  d %>%
+  mutate(journal = str_to_upper(journal)) %>%
+  inner_join(journal_ifs, by = "journal") %>%
+  mutate(bin = hutils::weighted_ntile(mean_if, weights = items, 10),
+         percentile = paste0((bin-1)*10, "-", bin*10))
+}
 
 ```
 
@@ -649,53 +1088,370 @@ journal_ifs <- read_csv("data/journal_impact_factors.csv") %>%
 
 ```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_journal.csv") %>%
+p1 <- read_csv("data/altmetrics_coverage_journal.csv") %>%
   filter(items >= 100) %>%
-  inner_join(journal_ifs, by = "journal") %>%
+  join_and_bin_journal_ifs() %>%
+  group_by(percentile) %>%
+  summarize(items = sum(items)) %>%
+  ggplot() +
+  geom_bar(aes(x = percentile, y = items), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = "",
+       y = "Articles")
+
+p2 <- read_csv("data/altmetrics_coverage_journal.csv") %>%
+  filter(items >= 100) %>%
+  join_and_bin_journal_ifs() %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
-  group_by(if_bin, indicator) %>%
-  mutate(coverage = sum(items_covered) / sum(items)) %>%
-  ggplot(aes(x = if_bin, y = coverage)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  facet_grid(. ~ indicator) +
-  scale_x_continuous(breaks = c(seq(0, 100, 20))) +
+  group_by(percentile, indicator) %>%
+  summarize(items = sum(items),
+            items_covered = sum(items_covered),
+            coverage = items_covered / items) %>%
+  ggplot() +
+  geom_point(aes(x = percentile, y = coverage), 
+             shape = 21, fill = "grey50", color = "grey10", size = 3, alpha = 0.5) +
+  facet_wrap(. ~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "Impact Factor Percentile",
-       y = "Coverage (%)",
-       fill = "")
+  labs(x = "",
+       y = "Coverage (%)")
+
+egg::ggarrange(p1 + theme(axis.title.x = element_blank(),
+                          plot.margin = margin(0, 30, 0, 0)),
+               p2, nrow = 1, widths = c(1,6))
 
 ```
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_journal_oa.sql))
 
-```{r echo = F, message = F, warning = F, fig.height = 3, fig.width = 12}
+```{r echo = F, message = F, warning = F, fig.height = 6, fig.width = 12}
 
-read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
+p1 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
   filter(items >= 100) %>%
-  inner_join(journal_ifs, by = "journal") %>%
+  join_and_bin_journal_ifs() %>%
+  mutate(type = factor(type, levels = c("closed", "open"))) %>%
+  group_by(percentile, type) %>%
+  summarize(items = sum(items)) %>%
+  ggplot() +
+  geom_bar(aes(x = percentile, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("open"))) +
+  labs(x = "Impact Factor Percentile",
+       y = "Articles",
+       fill = "")
+         
+p2 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
+  filter(items >= 100) %>%
+  join_and_bin_journal_ifs() %>%
   pivot_longer(blogs:wikipedia,
                names_to = "indicator",
                values_to = "items_covered") %>%
   mutate(type = factor(type, levels = c("open", "closed"))) %>%
-  group_by(if_bin, indicator, type) %>%
-  summarize(coverage = sum(items_covered) / sum(items),
+  group_by(percentile, indicator, type) %>%
+  summarize(items = sum(items),
             items_covered = sum(items_covered),
-            items = sum(items)) %>%
+            coverage = items_covered/items) %>%
   ungroup() %>%
-  group_by(if_bin, indicator) %>%
+  ggplot() +
+  geom_point(aes(x = percentile, y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_wrap(~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Impact Factor Percentile",
+       y = "Coverage (%)",
+       fill = "")
+
+p3 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
+  filter(items >= 100) %>%
+  join_and_bin_journal_ifs() %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  group_by(percentile, indicator, type) %>%
+  summarize(items = sum(items),
+            items_covered = sum(items_covered),
+            coverage = items_covered/items) %>%
+  ungroup() %>%
+  group_by(percentile, indicator) %>%
   mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
   ggplot() +
-  geom_point(aes(x = if_bin, y = rel_coverage, fill = type), 
-             shape = 21, color = "grey10", size = 3, alpha = 0.75) +
+  geom_point(aes(x = percentile, y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
   geom_hline(yintercept = 1, linetype = "dotted") +
   facet_wrap(~ indicator, nrow = 1) +
-  scale_y_continuous(limits = c(0,2)) +
+  expand_limits(y = 0) +
   scale_fill_manual(values = c(palette_color("open"), 
                                palette_color("closed"))) +
   labs(x = "Impact Factor Percentile",
        y = "Relative Coverage",
        fill = "")
 
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          plot.margin = margin(0, 30, 0, 0)), 
+               p2 + theme(legend.position = "top"),
+               ggplot() + theme(panel.border = element_blank()),
+               p3 + theme(legend.position = "none"),
+               nrow = 2, ncol = 2, widths = c(1,6))
+
 ```
+
+##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_journal_oa_types.sql))
+
+```{r echo = F, message = F, warning = F, fig.height = 6, fig.width = 12}
+
+p1 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
+  filter(items >= 100) %>%
+  join_and_bin_journal_ifs() %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  group_by(percentile, type) %>%
+  summarize(items = sum(items)) %>%
+  ggplot() +
+  geom_bar(aes(x = percentile, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Impact Factor Percentile",
+       y = "Articles",
+       fill = "")
+         
+p2 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
+  filter(items >= 100) %>%
+  join_and_bin_journal_ifs() %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  group_by(percentile, indicator, type) %>%
+  summarize(items = sum(items),
+            items_covered = sum(items_covered),
+            coverage = items_covered/items) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_point(aes(x = percentile, y = coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  facet_wrap(~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Impact Factor Percentile",
+       y = "Coverage (%)",
+       fill = "")
+
+p3 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
+  filter(items >= 100) %>%
+  join_and_bin_journal_ifs() %>%
+  pivot_longer(blogs:wikipedia,
+               names_to = "indicator",
+               values_to = "items_covered") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  group_by(percentile, indicator, type) %>%
+  summarize(items = sum(items),
+            items_covered = sum(items_covered),
+            coverage = items_covered/items) %>%
+  ungroup() %>%
+  group_by(percentile, indicator) %>%
+  mutate(rel_coverage = coverage / (sum(items_covered) / sum(items))) %>%
+  ggplot() +
+  geom_point(aes(x = percentile, y = rel_coverage, fill = type), 
+             shape = 21, color = "grey10", size = 3, alpha = 0.5) +
+  geom_hline(yintercept = 1, linetype = "dotted") +
+  facet_wrap(~ indicator, nrow = 1) +
+  expand_limits(y = 0) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Impact Factor Percentile",
+       y = "Relative Coverage",
+       fill = "")
+
+egg::ggarrange(p1 + theme(legend.position = "none",
+                          plot.margin = margin(0, 30, 0, 0)), 
+               p2 + theme(legend.position = "top"),
+               ggplot() + theme(panel.border = element_blank()),
+               p3 + theme(legend.position = "none"),
+               nrow = 2, ncol = 2, widths = c(1,6))
+
+```
+
+* High coverage of Gold OA in blogs, Facebook and Twitter in 40-50th percentile. Not clear why - several large, biomedical/health-focused Gold OA journals (not including PLOS ONE) are in this category which have high counts.
+* High Wikipedia coverage of Bronze OA in 40-50th percentile is due to high coverage in a single journal: "International Journal of Systematic and Evolutionary Microbiology" which is cited in Wikipedia 1476 times - the journal publishes papers which establish names of new bacteria. 
+
+## Case Studies
+
+Here we look at some of the most interesting results from the individual units in detail, and explore interactions between different units:
+
+### 1. Gold OA papers are poorly cited in policy documents
+
+```{r echo = F, message = F, warning = F, fig.height = 8, fig.width = 16}
+
+top_policy_countries <- read_csv("data/policy_countries.csv") %>%
+  group_by(policy_country) %>%
+  summarize(n = sum(n_items)) %>%
+  top_n(8, n) %>%
+  pull(policy_country)
+
+top_author_countries <- read_csv("data/policy_countries.csv") %>%
+  group_by(author_country) %>%
+  summarize(n = sum(n_items)) %>%
+  top_n(12, n) %>%
+  pull(author_country)
+
+read_csv("data/policy_countries.csv") %>%
+  mutate(
+    author_country = case_when(
+      author_country %in% top_author_countries ~ author_country,
+      T ~ "Other"
+    ),
+    policy_country = case_when(
+      policy_country %in% top_policy_countries ~ policy_country,
+      T ~ "Other"
+    )) %>%
+  ggforce::gather_set_data(1:2) %>%
+  ggplot(aes(x, id = id, split = y, value = n_items)) +
+    ggforce::geom_parallel_sets(aes(fill = author_country), 
+                                alpha = 0.5, sep = 0.03, n = 1000) +
+    ggforce::geom_parallel_sets_axes(axis.width = 0.1, fill = "grey99", 
+                                     color="grey75", sep = 0.03) +
+    ggforce::geom_parallel_sets_labels(angle = 0, colour = "black", sep = 0.03) +
+    theme_void() +
+    theme(legend.position = "none") +
+    viridis::scale_fill_viridis(discrete = T)
+
+```
+
+
+Given that policy documents focus heavily on Western, English-language countries, why is the coverage of Gold OA publications so low? 
+
+Do these countries publish more Gold OA than others?
+
+```{r}
+
+big_countries <- c("US", "GB", "AU", "CA")
+
+read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
+  mutate(is_big = case_when(
+    country %in% big_countries ~ T,
+    T ~ F
+  )) %>%
+  group_by(type, is_big) %>%
+  summarize(items = sum(items)) %>%
+  mutate(proportion = items / sum(items)) %>%
+  ggplot() +
+  geom_bar(aes(x = type, y = proportion, fill = is_big), stat = "identity")
+
+```
+
+Can we correct the coverage-OA types graph, only including papers authored from US, GB, AU, CA?
+
+
+
+
+
+
+```{r}
+
+read_csv("data/policy_countries_oa_types.csv") %>%
+  mutate(
+    author_country = case_when(
+      author_country %in% top_author_countries ~ author_country,
+      T ~ "Other"
+    ),
+    policy_country = case_when(
+      policy_country %in% top_policy_countries ~ policy_country,
+      T ~ "Other"
+    )) %>%
+  select(type, author_country, policy_country, n_items) %>%
+  ggforce::gather_set_data(1:3) %>%
+  ggplot(aes(x, id = id, split = y, value = n_items)) +
+    ggforce::geom_parallel_sets(aes(fill = author_country), 
+                                alpha = 0.5, sep = 0.03, n = 1000) +
+    ggforce::geom_parallel_sets_axes(axis.width = 0.1, fill = "grey99", 
+                                     color="grey75", sep = 0.03) +
+    ggforce::geom_parallel_sets_labels(angle = 0, colour = "black", sep = 0.03) +
+    theme_void() +
+    theme(legend.position = "none") +
+    viridis::scale_fill_viridis(discrete = T)
+
+```
+
+
+
+#### A deeper look at Twitter at the country level: who is tweeting OA and non-OA articles?
+
+Are OA articles more tweeted by authors in their own country?
+
+-> https://www.frontiersin.org/articles/10.3389/frma.2016.00008/full
+
+"We find that papers published by those authors from Chinese affiliations have much lower visibility on the social web than articles from other countries, when there is no significant difference for the citations. Fewer of China’s publications get tweeted, and those tweeted publications attract less social attention. A geographical analysis of tweeters shows that scholarly articles get most of their social attention from the authors’ home countries"
+
+```{r echo = F, message = F, warning = F, fig.height = 24, fig.width = 6}
+
+d <- read_csv("data/twitter_country_oa.csv") %>%
+  filter(nchar(author_country) == 2,
+         tweets != "NULL") %>%  na.omit() %>%
+  mutate(tweets = as.numeric(tweets))
+
+top_countries <- d %>%
+  group_by(author_country) %>%
+  summarize(tweets = sum(tweets)) %>%
+  ungroup() %>%
+  top_n(30, tweets) %>%
+  pull(author_country)
+
+countries_oa <- read_csv("data/altmetrics_coverage_country_oa.csv") %>%
+  select(country, type, items)
+
+oa_share <- read_csv("data/oa_share_year.csv") %>%
+  summarize(closed = sum(closed),
+            open = sum(open)) %>%
+  pivot_longer(closed:open,
+               names_to = "type",
+               values_to = "items")
+
+d %>%
+  group_by(tweeter_country, type) %>%
+  summarize(tweets = sum(tweets)) %>%
+  ungroup() %>%
+  inner_join(oa_share, by = "type") %>%
+  group_by(tweeter_country) %>%
+  mutate(tweets_per_item = tweets/items,
+         rel_tweets_per_item = (tweets/items) / (sum(tweets)/sum(items))) %>%
+  ungroup() %>%
+  mutate(continent = countrycode::countrycode(tweeter_country, "iso2c", "continent")) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(tweeter_country, desc(tweeter_country)), y = rel_tweets_per_item, fill = type),
+             shape = 21) +
+  facet_grid(continent ~ ., scales = "free_y", space = "free") +
+  coord_flip()
+
+```
+
+
+
+
+## Study Limitations
+
+- Observational evidence only
+- Country/language preferences in Altmetric.com sources
