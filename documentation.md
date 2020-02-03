@@ -27,6 +27,7 @@ The study aims to address the following research questions:
 With respect to RQ3, the following factors will be investigated:
 
   - Time
+  - Document types (article versus review documents)
   - Discipline
   - Country of authorship
   - Publication venue (journal prestige)
@@ -369,6 +370,20 @@ documents in particular show a large separation in coverage between Gold
 OA and other types of OA - the reasons for this will be investigated in
 a later section.
 
+#### By Document Type
+
+##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_doctype.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+\#\#\#\#\# Relative altmetric coverage in OA versus non-OA publications
+([query](queries/calc_altmetrics_coverage_doctype_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_doctype_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
 #### By Classification
 
 ##### Abbrevations for subject classifications
@@ -384,7 +399,7 @@ are abbreviated as follows:
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_classification.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 Higher altmetric coverage is observed in BHS, LES and SSH than MCS and
 PSE. SSH has the highest coverage on blogs and in policy documents,
@@ -393,7 +408,7 @@ MCS has the lowest coverage across all indicators.
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 Interestingly, whilst PSE and MCS were shown in the previous figure to
 have generally lower coverage across all indicators than other subject
@@ -405,7 +420,7 @@ publications is only slightly greater than 1.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_classification_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 High coverage of PSE in OA publications appears to be driven mainly by
 Green and Bronze OA. With respect to blogs and Wikipedia, Bronze OA has
@@ -420,19 +435,19 @@ of Green OA on arXiv.
 For the following analysis, the top 5 countries per region (Africa,
 Americas, Europe, Asia, Oceania) by publishing volume are included. For
 Oceania, only Australia and New Zealand are included as publishing
-volumes for other countries (e.g. Fiji) are extremely low.
+volumes for other countries were found to be extremely low.
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_country.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_country_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_country_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 #### By Journal
 
@@ -447,15 +462,15 @@ subject areas?\]
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_journal.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_journal_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_journal_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
   - High coverage of Gold OA in blogs, Facebook and Twitter in 40-50th
     percentile. Not clear why - several large, biomedical/health-focused
@@ -467,83 +482,38 @@ subject areas?\]
     Wikipedia 1476 times - the journal publishes papers which establish
     names of new bacteria.
 
-## Case Studies
+## Discussion: opportunities and limitations of using altmetrics to measure the ‘social impact’ of Open Access
 
-Here we look at some of the most interesting results from the individual
-units in detail, and explore interactions between different units:
+Key points:
 
-### 1\. Gold OA papers are poorly cited in policy documents
+  - Almost all units of analysis (years, subject classifications,
+    countries, journal prestige) show a large ‘altmetrics advantage’ of
+    OA publications over non-OA publications. A general exception
+    appears to be in low-prestige (or at least low-IF) journals, where
+    the opposite relationship is true.
+  - There exists great variability in the response of altmetrics to the
+    *type* of OA, an example being in policy documents, where Gold OA is
+    cited relatively less frequently than other forms of OA.
+  - The units of analysis here should not be considered in isolation,
+    e.g. there is likely interaction between the country of authorship
+    and subject classifications, as countries may prioritise research in
+    different areas.
+  - The data gathered and presented above are purely observational, and
+    thus it is difficult to extract causal relationships
+  - There exist significant barriers to overcome with respect to the
+    data sources themselves, both for bibliometric databases and
+    altmetrics sources.
 
-![](documentation_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+The last point is explored in more detail below:
 
-Given that policy documents focus heavily on Western, English-language
-countries, why is the coverage of Gold OA publications so low?
+### Data Sources
 
-Do these countries publish more Gold OA than others?
+#### Geographical bias in altmetrics data
 
-``` r
-big_countries <- c("US", "GB", "AU", "CA")
+##### Geographical bias in Twitter ([query](queries/calc_twitter_countries.sql))
 
-read_csv("data/altmetrics_coverage_country_oa_types.csv") %>%
-  mutate(is_big = case_when(
-    country %in% big_countries ~ T,
-    T ~ F
-  )) %>%
-  group_by(type, is_big) %>%
-  summarize(items = sum(items)) %>%
-  mutate(proportion = items / sum(items)) %>%
-  ggplot() +
-  geom_bar(aes(x = type, y = proportion, fill = is_big), stat = "identity")
-```
+![](documentation_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
-    ## Parsed with column specification:
-    ## cols(
-    ##   country = col_character(),
-    ##   type = col_character(),
-    ##   items = col_double(),
-    ##   blogs = col_double(),
-    ##   facebook = col_double(),
-    ##   news = col_double(),
-    ##   policies = col_double(),
-    ##   twitter = col_double(),
-    ##   wikipedia = col_double()
-    ## )
+##### Geographical bias in policy documents ([query](queries/calc_policy_countries.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
-
-Can we correct the coverage-OA types graph, only including papers
-authored from US, GB, AU, CA?
-
-``` r
-read_csv("data/policy_countries_oa_types.csv") %>%
-  mutate(
-    author_country = case_when(
-      author_country %in% top_author_countries ~ author_country,
-      T ~ "Other"
-    ),
-    policy_country = case_when(
-      policy_country %in% top_policy_countries ~ policy_country,
-      T ~ "Other"
-    )) %>%
-  select(type, author_country, policy_country, n_items) %>%
-  ggforce::gather_set_data(1:3) %>%
-  ggplot(aes(x, id = id, split = y, value = n_items)) +
-    ggforce::geom_parallel_sets(aes(fill = author_country), 
-                                alpha = 0.5, sep = 0.03, n = 1000) +
-    ggforce::geom_parallel_sets_axes(axis.width = 0.1, fill = "grey99", 
-                                     color="grey75", sep = 0.03) +
-    ggforce::geom_parallel_sets_labels(angle = 0, colour = "black", sep = 0.03) +
-    theme_void() +
-    theme(legend.position = "none") +
-    viridis::scale_fill_viridis(discrete = T)
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   author_country = col_character(),
-    ##   policy_country = col_character(),
-    ##   n_items = col_double(),
-    ##   type = col_character()
-    ## )
-
-![](documentation_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
