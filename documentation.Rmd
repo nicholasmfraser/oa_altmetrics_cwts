@@ -50,6 +50,14 @@ This R notebook contains documentation for the study on the relationship between
 
 [TBC]
 
+Important:
+* https://doi.org/10.1007/s11192-019-03301-x
+* https://doi.org/10.1002/bult.2013.1720390406
+* https://doi.org/10.3145/epi.2020.ene.02
+* https://openaccess.leidenuniv.nl/handle/1887/65221
+* https://www.ideals.illinois.edu/bitstream/handle/2142/73451/212_ready.pdf
+
+
 ## Research Questions
 
 The study aims to address the following research questions: 
@@ -371,6 +379,46 @@ The results show that the contribution of Gold articles to Green OA shares has g
 From the above results, a general recommendation is that Green OA should not be considered a 'black box' in the context of understanding impact metrics, as it includes multiple archiving routes, and interacts strongly with other forms of OA. However, creating many other 'categories' of Green OA (i.e. one category for Green OA including PMC and one excluding PMC) for analysis purposes is also sub-optimal, as categories will become increasingly granular and large-scale mechanisms influencing impact are lost.
 
 For simplification purposes, PMC is therefore excluded as a form of Green OA in this study. The reasoning for this is based on: (1) that PMC clearly represents a different *form* of archiving than other forms of Green OA, i.e. the author takes no direct action to deposit their work, (2) that PMC largely overlaps with other forms of journal-based OA, in particular with Gold OA, which may skew results towards these OA forms, and (3) there exist data quality issues, with respect to missing PMC data in 2018 and 2019.
+
+```{r echo = F, message = F, warning = F, fig.height = 6, fig.width = 4}
+
+p1 <- read_csv("data/altmetrics_coverage_year_oa.csv") %>%
+  mutate(type = factor(type, levels = c("closed", "open"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("open"))) +
+  labs(x = "",
+       y = "Articles",
+       fill = "")
+
+
+p2 <- read_csv("data/altmetrics_coverage_year_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  ggplot() +
+  geom_bar(aes(x = year, y = items, fill = type), stat = "identity") +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(2012, 2014, 2016, 2018)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "",
+       y = "Articles",
+       fill = "")
+
+egg::ggarrange(p1,
+               p2, nrow = 2, heights = c(1,1))
+
+
+```
+
 
 ## Results
 
@@ -1590,3 +1638,194 @@ read_csv("data/policy_countries.csv") %>%
 
 
 
+```{r}
+
+read_csv("data/twitter_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
+
+
+```{r}
+
+read_csv("data/twitter_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
+
+
+```{r}
+
+read_csv("data/facebook_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
+
+
+```{r}
+
+read_csv("data/facebook_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
+
+```{r}
+
+read_csv("data/news_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
+
+
+```{r}
+
+read_csv("data/news_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
+
+
+
+```{r}
+
+read_csv("data/wikipedia_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
+
+
+
+```{r}
+
+read_csv("data/wikipedia_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+
+```
