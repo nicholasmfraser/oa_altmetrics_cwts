@@ -11,6 +11,12 @@ between Open Access (OA) and altmetrics.
 
 \[TBC\]
 
+Important: \* <https://doi.org/10.1007/s11192-019-03301-x> \*
+<https://doi.org/10.1002/bult.2013.1720390406> \*
+<https://doi.org/10.3145/epi.2020.ene.02> \*
+<https://openaccess.leidenuniv.nl/handle/1887/65221> \*
+<https://www.ideals.illinois.edu/bitstream/handle/2142/73451/212_ready.pdf>
+
 ## Research Questions
 
 The study aims to address the following research questions:
@@ -316,6 +322,8 @@ particular with Gold OA, which may skew results towards these OA forms,
 and (3) there exist data quality issues, with respect to missing PMC
 data in 2018 and 2019.
 
+![](documentation_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
 ## Results
 
 ### Altmetric Coverage and OA
@@ -330,7 +338,7 @@ stored by Unpaywall)
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_year.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 The highest coverage is observed in Twitter, followed by Facebook, then
 news and blogs, Wikipedia and policies. Different temporal trends are
@@ -343,7 +351,7 @@ Costas, 2018](https://openaccess.leidenuniv.nl/handle/1887/65278)).
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_year_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 In general terms, OA articles receive greater coverage in all altmetric
 indicators than non-OA articles for all years. The advantage is
@@ -357,7 +365,7 @@ marginally for policies.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_year_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 Different trends are observed within each type of OA. A broad
 generalisation is that for most indicators, with the exception of
@@ -374,15 +382,15 @@ a later section.
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_doctype.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 \#\#\#\#\# Relative altmetric coverage in OA versus non-OA publications
 ([query](queries/calc_altmetrics_coverage_doctype_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_doctype_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 #### By Classification
 
@@ -399,7 +407,7 @@ are abbreviated as follows:
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_classification.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 Higher altmetric coverage is observed in BHS, LES and SSH than MCS and
 PSE. SSH has the highest coverage on blogs and in policy documents,
@@ -408,7 +416,7 @@ MCS has the lowest coverage across all indicators.
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_classification_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 Interestingly, whilst PSE and MCS were shown in the previous figure to
 have generally lower coverage across all indicators than other subject
@@ -420,7 +428,7 @@ publications is only slightly greater than 1.
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_classification_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 High coverage of PSE in OA publications appears to be driven mainly by
 Green and Bronze OA. With respect to blogs and Wikipedia, Bronze OA has
@@ -439,15 +447,15 @@ volumes for other countries were found to be extremely low.
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_country.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_country_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_country_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 #### By Journal
 
@@ -462,15 +470,15 @@ subject areas?\]
 
 ##### Total altmetric coverage per indicator ([query](queries/calc_altmetrics_coverage_journal.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
 
 ##### Relative altmetric coverage in OA versus non-OA publications ([query](queries/calc_altmetrics_coverage_journal_oa.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 ##### Relative altmetric coverage in different access types ([query](queries/calc_altmetrics_coverage_journal_oa_types.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
   - High coverage of Gold OA in blogs, Facebook and Twitter in 40-50th
     percentile. Not clear why - several large, biomedical/health-focused
@@ -512,8 +520,264 @@ The last point is explored in more detail below:
 
 ##### Geographical bias in Twitter ([query](queries/calc_twitter_countries.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ##### Geographical bias in policy documents ([query](queries/calc_policy_countries.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+
+``` r
+read_csv("data/twitter_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 1082 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
+``` r
+read_csv("data/twitter_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 2703 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+
+``` r
+read_csv("data/facebook_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 1074 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+``` r
+read_csv("data/facebook_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 2606 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+
+``` r
+read_csv("data/news_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 1074 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+
+``` r
+read_csv("data/news_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 2621 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+
+``` r
+read_csv("data/wikipedia_timediff_oa.csv") %>%
+  mutate(type = factor(type, levels = c("open", "closed"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("open"), 
+                               palette_color("closed"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 1019 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+
+``` r
+read_csv("data/wikipedia_timediff_oa_types.csv") %>%
+  mutate(type = factor(type, 
+                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
+  filter(timediff > 0) %>%
+  group_by(type) %>%
+  arrange(timediff) %>%
+  mutate(proportion = n_items/sum(n_items),
+         cumulative_proportion = cumsum(proportion)) %>%
+  ggplot() +
+  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
+             shape = 21, size = 2, alpha = 0.5) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(limit = c(-0.5, 100.5)) +
+  scale_fill_manual(values = c(palette_color("closed"), 
+                               palette_color("gold"),
+                               palette_color("hybrid"),
+                               palette_color("bronze"),
+                               palette_color("green"))) +
+  labs(x = "Time difference (days)",
+       y = "Proportion of all tweets received")
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   type = col_character(),
+    ##   timediff = col_double(),
+    ##   n_items = col_double()
+    ## )
+
+    ## Warning: Removed 2278 rows containing missing values (geom_point).
+
+![](documentation_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
