@@ -1,0 +1,5 @@
+﻿type,median_min_timediff
+open,10
+closed,26
+Warning: Null value is eliminated by an aggregate or other SET operation.
+
