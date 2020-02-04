@@ -26,5 +26,6 @@ FROM (
 		t3.altmetric_id = t4.altmetric_id
 	WHERE
 		YEAR(t3.citation_pubdate) = 2016
+		AND t4.posted_on IS NOT NULL
 	GROUP BY
 		t1.doi, t1.closed) AS s1;
