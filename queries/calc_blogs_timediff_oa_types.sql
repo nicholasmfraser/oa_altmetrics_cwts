@@ -23,6 +23,7 @@ ON
 WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.closed = 1
+	AND t4.posted_on IS NOT NULL
 GROUP BY
 	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
@@ -47,6 +48,7 @@ ON
 WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.gold = 1
+	AND t4.posted_on IS NOT NULL
 GROUP BY
 	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
@@ -71,6 +73,7 @@ ON
 WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.hybrid = 1
+	AND t4.posted_on IS NOT NULL
 GROUP BY
 	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
@@ -95,6 +98,7 @@ ON
 WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.bronze = 1
+	AND t4.posted_on IS NOT NULL
 GROUP BY
 	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
@@ -119,5 +123,6 @@ ON
 WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.green = 1
+	AND t4.posted_on IS NOT NULL
 GROUP BY
 	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on);
