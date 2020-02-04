@@ -1,7 +1,7 @@
 SET NOCOUNT ON;
 
 /* Calculate the time difference between an article being published
-and being tweeted about, for all access types (closed, gold, hybrid, bronze, green) */
+and being mentioned on wikipedia, for all access types (closed, gold, hybrid, bronze, green) */
 SELECT
 	'closed' AS type,
 	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on) as timediff,
@@ -24,7 +24,7 @@ WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.closed = 1
 GROUP BY
-	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on), t1.closed
+	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
 SELECT
 	'gold' AS type,
@@ -48,7 +48,7 @@ WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.gold = 1
 GROUP BY
-	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on), t1.closed
+	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
 SELECT
 	'hybrid' AS type,
@@ -72,7 +72,7 @@ WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.hybrid = 1
 GROUP BY
-	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on), t1.closed
+	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
 SELECT
 	'bronze' AS type,
@@ -96,7 +96,7 @@ WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.bronze = 1
 GROUP BY
-	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on), t1.closed
+	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on)
 UNION ALL
 SELECT
 	'green' AS type,
@@ -120,4 +120,4 @@ WHERE
 	YEAR(t3.citation_pubdate) = 2016
 	AND t1.green = 1
 GROUP BY
-	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on), t1.closed;
+	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on);

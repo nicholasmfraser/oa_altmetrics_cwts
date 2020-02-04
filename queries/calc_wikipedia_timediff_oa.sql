@@ -1,7 +1,7 @@
 SET NOCOUNT ON;
 
 /* Calculate the time difference between an article being published
-and being shared on facebook, grouped by OA vs non-OA articles (2017 only) */
+and being mentioned on wikipedia, grouped by OA vs non-OA articles (2017 only) */
 SELECT
 	CASE WHEN t1.closed = 1 THEN 'closed' ELSE 'open' END AS type,
 	DATEDIFF(dd, t3.citation_pubdate, t4.posted_on) as timediff,
