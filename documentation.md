@@ -490,6 +490,58 @@ subject areas?\]
     Wikipedia 1476 times - the journal publishes papers which establish
     names of new bacteria.
 
+#### Rate of dissemination in altmetric sources
+
+##### Twitter: OA versus non-OA ([query](queries/calc_twitter_timediff_oa.sql))
+
+  - Note: Triangles refer to the median time to the first tweet
+
+![](documentation_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+
+##### Twitter: all OA types ([query](queries/calc_twitter_timediff_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+
+##### Facebook: OA versus non-OA ([query](queries/calc_facebook_timediff_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
+##### Facebook: all OA types ([query](queries/calc_facebook_timediff_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+
+##### News: OA versus non-OA ([query](queries/calc_news_timediff_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+##### News: all OA types ([query](queries/calc_news_timediff_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+
+##### Blogs: OA versus non-OA ([query](queries/calc_blogs_timediff_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+
+##### Blogs: all OA types ([query](queries/calc_blogs_timediff_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+
+##### Wikipedia: OA versus non-OA ([query](queries/calc_wikipedia_timediff_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+
+##### Wikipedia: all OA types ([query](queries/calc_wikipedia_timediff_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+
+##### Policies: OA versus non-OA ([query](queries/calc_policy_timediff_oa.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+
+##### Policies: all OA types ([query](queries/calc_policy_timediff_oa_types.sql))
+
+![](documentation_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+
 ## Discussion: opportunities and limitations of using altmetrics to measure the ‘social impact’ of Open Access
 
 Key points:
@@ -520,264 +572,8 @@ The last point is explored in more detail below:
 
 ##### Geographical bias in Twitter ([query](queries/calc_twitter_countries.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 ##### Geographical bias in policy documents ([query](queries/calc_policy_countries.sql))
 
-![](documentation_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
-
-``` r
-read_csv("data/twitter_timediff_oa.csv") %>%
-  mutate(type = factor(type, levels = c("open", "closed"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("open"), 
-                               palette_color("closed"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 1082 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
-
-``` r
-read_csv("data/twitter_timediff_oa_types.csv") %>%
-  mutate(type = factor(type, 
-                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("closed"), 
-                               palette_color("gold"),
-                               palette_color("hybrid"),
-                               palette_color("bronze"),
-                               palette_color("green"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 2703 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
-
-``` r
-read_csv("data/facebook_timediff_oa.csv") %>%
-  mutate(type = factor(type, levels = c("open", "closed"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("open"), 
-                               palette_color("closed"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 1074 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
-
-``` r
-read_csv("data/facebook_timediff_oa_types.csv") %>%
-  mutate(type = factor(type, 
-                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("closed"), 
-                               palette_color("gold"),
-                               palette_color("hybrid"),
-                               palette_color("bronze"),
-                               palette_color("green"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 2606 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
-
-``` r
-read_csv("data/news_timediff_oa.csv") %>%
-  mutate(type = factor(type, levels = c("open", "closed"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("open"), 
-                               palette_color("closed"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 1074 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
-
-``` r
-read_csv("data/news_timediff_oa_types.csv") %>%
-  mutate(type = factor(type, 
-                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("closed"), 
-                               palette_color("gold"),
-                               palette_color("hybrid"),
-                               palette_color("bronze"),
-                               palette_color("green"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 2621 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
-
-``` r
-read_csv("data/wikipedia_timediff_oa.csv") %>%
-  mutate(type = factor(type, levels = c("open", "closed"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("open"), 
-                               palette_color("closed"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 1019 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
-
-``` r
-read_csv("data/wikipedia_timediff_oa_types.csv") %>%
-  mutate(type = factor(type, 
-                       levels = c("closed", "gold", "hybrid", "bronze", "green"))) %>%
-  filter(timediff > 0) %>%
-  group_by(type) %>%
-  arrange(timediff) %>%
-  mutate(proportion = n_items/sum(n_items),
-         cumulative_proportion = cumsum(proportion)) %>%
-  ggplot() +
-  geom_point(aes(x = timediff, y = cumulative_proportion, fill = type), 
-             shape = 21, size = 2, alpha = 0.5) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_x_continuous(limit = c(-0.5, 100.5)) +
-  scale_fill_manual(values = c(palette_color("closed"), 
-                               palette_color("gold"),
-                               palette_color("hybrid"),
-                               palette_color("bronze"),
-                               palette_color("green"))) +
-  labs(x = "Time difference (days)",
-       y = "Proportion of all tweets received")
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   type = col_character(),
-    ##   timediff = col_double(),
-    ##   n_items = col_double()
-    ## )
-
-    ## Warning: Removed 2278 rows containing missing values (geom_point).
-
-![](documentation_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](documentation_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
