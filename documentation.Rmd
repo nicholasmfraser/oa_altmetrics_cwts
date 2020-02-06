@@ -1340,7 +1340,9 @@ p1 <- read_csv("data/altmetrics_coverage_journal.csv") %>%
   expand_limits(y = 0) +
   scale_y_continuous(labels = scales::comma) +
   labs(x = "Impact Factor Percentile",
-       y = "Articles")
+       y = "Articles") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
+
 
 p2 <- read_csv("data/altmetrics_coverage_journal.csv") %>%
   filter(items >= 100) %>%
@@ -1359,7 +1361,8 @@ p2 <- read_csv("data/altmetrics_coverage_journal.csv") %>%
   expand_limits(y = 0) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "Impact Factor Percentile",
-       y = "Coverage (%)")
+       y = "Coverage (%)") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
 
 egg::ggarrange(p1 + theme(axis.title.x = element_blank(),
                           plot.margin = margin(0, 30, 0, 0)),
@@ -1385,8 +1388,9 @@ p1 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
                                palette_color("open"))) +
   labs(x = "Impact Factor Percentile",
        y = "Articles",
-       fill = "")
-         
+       fill = "") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
+
 p2 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
   filter(items >= 100) %>%
   join_and_bin_journal_ifs() %>%
@@ -1409,7 +1413,8 @@ p2 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
                                palette_color("closed"))) +
   labs(x = "Impact Factor Percentile",
        y = "Coverage (%)",
-       fill = "")
+       fill = "") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
 
 p3 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
   filter(items >= 100) %>%
@@ -1435,7 +1440,8 @@ p3 <- read_csv("data/altmetrics_coverage_journal_oa.csv") %>%
                                palette_color("closed"))) +
   labs(x = "Impact Factor Percentile",
        y = "Relative Coverage",
-       fill = "")
+       fill = "") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
 
 egg::ggarrange(p1 + theme(legend.position = "none",
                           plot.margin = margin(0, 30, 0, 0)), 
@@ -1468,7 +1474,8 @@ p1 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
                                palette_color("green"))) +
   labs(x = "Impact Factor Percentile",
        y = "Articles",
-       fill = "")
+       fill = "") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
          
 p2 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
   filter(items >= 100) %>%
@@ -1496,7 +1503,8 @@ p2 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
                                palette_color("green"))) +
   labs(x = "Impact Factor Percentile",
        y = "Coverage (%)",
-       fill = "")
+       fill = "") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
 
 p3 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
   filter(items >= 100) %>%
@@ -1526,7 +1534,8 @@ p3 <- read_csv("data/altmetrics_coverage_journal_oa_types.csv") %>%
                                palette_color("green"))) +
   labs(x = "Impact Factor Percentile",
        y = "Relative Coverage",
-       fill = "")
+       fill = "") +
+  theme(axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
 
 egg::ggarrange(p1 + theme(legend.position = "none",
                           plot.margin = margin(0, 30, 0, 0)), 
